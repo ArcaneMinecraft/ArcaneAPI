@@ -1,0 +1,9 @@
+[submodule "ArcaneChatUtils"]
+	path = ArcaneChatUtils
+	url = https://github.com/ArcaneMinecraft/ArcaneChatUtils.git
+[submodule "ArcaneSurvival"]
+	path = ArcaneSurvival
+	url = https://github.com/ArcaneMinecraft/ArcaneSurvival.git
+[submodule "ArcaneDonor"]
+	path = ArcaneDonor
+	url = https://github.com/ArcaneMinecraft/ArcaneDonor.git
