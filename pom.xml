@@ -8,6 +8,7 @@
     <module>ArcaneSurvival</module>
     <module>ArcaneDonor</module>
     <module>ArcaneChatUtils</module>
+    <module>ArcaneModeration</module>
   </modules>
   <repositories>
     <repository>

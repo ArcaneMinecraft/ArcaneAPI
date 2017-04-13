@@ -7,3 +7,6 @@
 [submodule "ArcaneDonor"]
 	path = ArcaneDonor
 	url = https://github.com/ArcaneMinecraft/ArcaneDonor.git
+[submodule "ArcaneModeration"]
+	path = ArcaneModeration
+	url = https://github.com/ArcaneMinecraft/ArcaneModeration.git
