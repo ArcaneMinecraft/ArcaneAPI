@@ -1,0 +1,15 @@
+name: ArcaneAPI
+version: ${project.version}
+authors: [Agentred100, jugglingman456, Morios, SimonOrJ]
+description: Arcane's Color, Web, and Utility API
+main: com.arcaneminecraft.ArcaneAPI
+website: https://arcaneminecraft.com/
+
+loadbefore: [ArcaneSurvival, ArcaneChatUtils, ArcaneDonor, ArcaneModeration]
+
+load: STARTUP
+
+commands:
+  arcaneplugins:
+    aliases: [arc, arcane]
+    description: Arcane help
