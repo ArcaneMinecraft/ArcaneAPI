@@ -4,4 +4,4 @@ restapi:
   # Port to use
   port: 80
   # IP addresses to listen from/accept
-  whitelist: [localhost, 127.0.0.1]
+  whitelist: [127.0.0.1]
