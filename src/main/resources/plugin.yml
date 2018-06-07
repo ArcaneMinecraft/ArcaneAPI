@@ -1,5 +1,5 @@
 name: ArcaneAPI
-main: com.arcaneminecraft.api.ArcaneAPI
+main: com.arcaneminecraft.api.SpigotArcAPI
 version: ${project.version}
 description: Arcane's Color, Web, and Utility API
 authors: [Agentred100, jugglingman456, Morios, SimonOrJ]

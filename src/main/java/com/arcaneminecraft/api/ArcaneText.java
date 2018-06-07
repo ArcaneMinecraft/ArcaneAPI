@@ -8,107 +8,115 @@
 package com.arcaneminecraft.api;
 
 import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.*;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
+import org.bukkit.Nameable;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
 
-public final class ArcaneCommons {
-    public static final String TAG = tag("Arcane");
+import javax.xml.soap.Text;
 
-    /**
-     * Message with a generic tag
-     * @param message - Message to send with the tag. Default color is ColorPalette.CONTENT.
-     * @return String of the message
-     */
-    public static String tagMessage(String message) {
-        return TAG + ColorPalette.CONTENT + message;
+public final class ArcaneText {
+    public static BaseComponent url(String SpaceDelimitedString) {
+        return url(SpaceDelimitedString.split(" "), 0);
     }
 
-    /**
-     * A tag in Arcane format
-     * @param tag - Tag to be formatted (don't insert brackets)
-     * @return String of tag in legacy color format (with a space at the end)
-     */
-    public static String tag(String tag) {
-        return ColorPalette.HEADING.toString() + ChatColor.BOLD + "[" + ChatColor.RESET + ColorPalette.HEADING + tag + ChatColor.BOLD + "] " + ColorPalette.CONTENT;
+    public static BaseComponent url(String[] ArrayWithLink) {
+        return url(ArrayWithLink, 0);
     }
 
-    /**
-     * Message with a generic tag
-     * @param tag - Tag to be formatted (don't insert brackets)
-     * @param message - Message to send. Default color is gray.
-     * @return String of the message
-     */
-    public static String tag(String tag, String message) {
-        return ColorPalette.HEADING.toString() + ChatColor.BOLD + "[" + ChatColor.RESET + ColorPalette.HEADING + tag + ChatColor.BOLD + "] " + ColorPalette.CONTENT + message;
+    public static BaseComponent url(String[] ArrayWithLink, int fromIndex) {
+        BaseComponent ret = new TextComponent();
+        for (int i = fromIndex; i < ArrayWithLink.length; i++) {
+            if (i != fromIndex) ret.addExtra(" ");
+            if (ArrayWithLink[i].matches(".+\\..+|http(s?):\\/\\/.+")) {
+                ret.addExtra(urlSingle(ArrayWithLink[i]));
+            } else {
+                ret.addExtra(ArrayWithLink[i]);
+            }
+        }
+        return ret;
     }
 
-    /**
-     * Constructible TextComponent with pre-formatted tag
-     * @param tag - Message to send with the tag. Default color is ColorPalette.CONTENT.
-     * @return TextComponent of tag (with a space at the end)
-     */
-    public static TextComponent tagTC(String tag) {
-        TextComponent ret = new TextComponent();
-        ret.setColor(ColorPalette.CONTENT);
+    public static BaseComponent urlSingle(String url) {
+        TextComponent ret = new TextComponent(
+                url.startsWith("http://") || url.startsWith("https://")
+                        ? url
+                        : "http://" + url
+        );
+        ret.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url));
+        return ret;
+    }
 
-        TextComponent a = new TextComponent("[");
-        a.setBold(true);
-        a.setColor(ColorPalette.HEADING);
-        ret.addExtra(a);
+    public static BaseComponent playerComponent(String name, String displayName, String uuid) {
+        BaseComponent ret = new TextComponent(displayName);
+        ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY, new ComponentBuilder("{name:\"" + name + "\", id:\"" + uuid + "\"}").create()));
+        ret.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/msg " + name + " "));
+        return ret;
+    }
 
-        a = new TextComponent(tag);
-        a.setColor(ColorPalette.HEADING);
-        ret.addExtra(a);
+    public static BaseComponent playerComponentSpigot(org.bukkit.command.CommandSender sender) {
+        if (!(sender instanceof Player)) {
+            if (sender instanceof ConsoleCommandSender)
+                return new TextComponent("Server");
+            return new TextComponent(((Nameable) sender).getCustomName());
+        }
+        Player p = (Player) sender;
+        BaseComponent ret = new TextComponent(p.getDisplayName());
+        ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY, new ComponentBuilder("{name:\"" + p.getName() + "\", id:\"" + p.getUniqueId() + "\"}").create()));
+        ret.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/msg " + p.getName() + " "));
+        return ret;
+    }
 
-        a = new TextComponent("]");
-        a.setBold(true);
-        a.setColor(ColorPalette.HEADING);
-        ret.addExtra(a);
+    public static BaseComponent playerComponentBungee(net.md_5.bungee.api.CommandSender sender) {
+        if (!(sender instanceof ProxiedPlayer)) {
+            return new TextComponent("Server");
+        }
+        ProxiedPlayer p = (ProxiedPlayer) sender;
+        BaseComponent ret = new TextComponent(p.getDisplayName());
+        ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY, new ComponentBuilder("{name:\"" + p.getName() + "\", id:\"" + p.getUniqueId() + "\"}").create()));
+        ret.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/msg " + p.getName() + " "));
+        return ret;
+    }
 
-        ret.addExtra(" ");
+    public static BaseComponent usageTranslatable(String translate) {
+        BaseComponent ret = new TranslatableComponent("commands.generic.usage", new TranslatableComponent(translate));
+        ret.setColor(ChatColor.RED);
+        return ret;
+    }
+
+    public static BaseComponent usage(String usage) {
+        BaseComponent ret = new TranslatableComponent("commands.generic.usage", usage);
+        ret.setColor(ChatColor.RED);
+        return ret;
+    }
+
+    public static BaseComponent playerNotFound(String player) {
+        BaseComponent ret = new TranslatableComponent("commands.generic.player.notFound", player);
+        ret.setColor(ChatColor.RED);
         return ret;
     }
 
     /**
      * Generic no permission message
-     * @return
+     * @return TranslatableComponent of "commands.generic.permission"
      */
-    public static String noPermissionMsg() {
-        return tagMessage("You do not have permission to do that.");
-    }
-
-    /**
-     * Generic no permission message containing command.
-     * @param cLabel
-     * @return
-     */
-    public static String noPermissionMsg(String label) {
-        return tagMessage("You do not have permission to run \"/" + label + "\".");
-    }
-
-    /**
-     * Generic no permission message with arguments.
-     * @param cLabel
-     * @param subcommand
-     * @return
-     */
-    public static String noPermissionMsg(String label, String subcommand) {
-        return tagMessage("You do not have permission to use \""
-                + subcommand + "\" in \"/" + label + "\".");
+    public static BaseComponent noPermissionMsg() {
+        BaseComponent ret = new TranslatableComponent("commands.generic.permission");
+        ret.setColor(ChatColor.RED);
+        return ret;
     }
 
     /**
      * Returns a "no-console" message
-     * @return
+     * @return TextComponent saying player required
      */
-    public static String noConsoleMsg() {
-        return tagMessage("You must be a player.");
+    public static BaseComponent noConsoleMsg() {
+        BaseComponent ret = new TextComponent("You must be a player.");
+        return ret;
     }
 
     /**
@@ -185,10 +193,6 @@ public final class ArcaneCommons {
         return sendListCommon(sender, header, LIST, null, footerData, 0, true);
     }
 
-    /**
-     * Same parameters, but lists "commands" in a list format.
-     * @see sendCommandMenu()
-     */
     public static boolean sendListMenu(CommandSender sender, String header, String LIST[][], String[] footerData) {
         return sendListCommon(sender, header, LIST, null, footerData, 0, false);
     }
