@@ -1,48 +1,72 @@
 package com.arcaneminecraft.api;
 
 public enum BungeeCommandUsage {
-    AFK             ("/afk"),
-    APPLY           ("/apply"),
-    GREYLIST        ("/greylist",   null,                   "arcane.command.greylist"),
-    REPLY           ("/reply",      "<private message ...>"),
-    LINKS           ("/links"),
-    NEWS            ("/news"),
-    PING            ("/ping",       "[player]"),
-    SEEN            ("/seen",       "<player>"),
-    SLAP            ("/slap",       "<player>",             "arcane.command.slap"),
-    FINDPLAYER      ("/findplayer", "<part of name>"),
-    FIRSTSEEN       ("/firstseen",  "[player]"),
-    STAFFCHAT       ("/a",          "<staff message ...>",  "arcane.command.a"),
-    STAFFCHATTOGGLE ("/atoggle",    null,                   "arcane.command.a");
+    AFK             ("afk"),
+    APPLY           ("apply"),
+    GREYLIST        ("greylist",    null,                   "arcane.command.greylist"),
+    REPLY           ("reply",       "<private message ...>"),
+    LINKS           ("links"),
+    ME              ("me",          "commands.me.usage"),
+    MSG             ("msg",         "commands.message.usage"),
+    NEWS            ("news"),
+    PING            ("ping",        "[player]"),
+    SEEN            ("seen",        "<player>"),
+    SLAP            ("slap",        "<player>",             "arcane.command.slap"),
+    FINDPLAYER      ("findplayer",  "<part of name>"),
+    FIRSTSEEN       ("firstseen",   "[player]"),
+    STAFFCHAT       ("a",           "<staff message ...>",  "arcane.command.a"),
+    STAFFCHATTOGGLE ("atoggle",     null,                   "arcane.command.a");
 
-    private final String command;
+    private final String name;
     private final String usage;
     private final String permission;
+    private final boolean vanillaNode;
 
-    BungeeCommandUsage(String command){
-        this.command = command;
-        this.usage = command;
+    BungeeCommandUsage(String name){
+        this.name = name;
+        this.usage = "/" + name;
+        this.permission = null;
+        this.vanillaNode = false;
+    }
+
+    BungeeCommandUsage(String name, String usage){
+        this.name = name;
+        if (usage.startsWith("commands.")) {
+            this.usage = usage;
+            this.vanillaNode = true;
+        } else {
+            this.usage = "/" + name + " " + usage;
+            this.vanillaNode = false;
+        }
         this.permission = null;
     }
 
-    BungeeCommandUsage(String command, String usage){
-        this.command = command;
-        this.usage = command + " " + usage;
-        this.permission = null;
-    }
-
-    BungeeCommandUsage(String command, String usage, String permission){
-        this.command = command;
-        this.usage = usage == null ? command : command + " " + usage;
+    BungeeCommandUsage(String name, String usage, String permission){
+        this.name = name;
+        if (usage != null && usage.startsWith("commands.")) {
+            this.usage = usage;
+            this.vanillaNode = true;
+        } else {
+            this.usage = "/" + name + (usage == null ? "" : " " + usage);
+            this.vanillaNode = false;
+        }
         this.permission = permission;
     }
 
+    public String getName() {
+        return name;
+    }
+
     public String getCommand() {
-        return command;
+        return "/" + name;
     }
 
     public String getUsage() {
         return usage;
+    }
+
+    public boolean usageIsVanillaNode() {
+        return vanillaNode;
     }
 
     public String getPermission() {
