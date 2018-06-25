@@ -8,6 +8,7 @@ public enum BungeeCommandUsage {
     FINDPLAYER      ("findplayer", "<part of name>", null, "Find player name from part of name", "find"),
     FIRSTSEEN       ("firstseen", "[player]", null, "Get the date when player first joined the game", "seenf"),
     LINKS           ("links", null, "arcane.command.links", null, "link", "website", "forum", "discord"),
+    LIST            ("list"),
     ME              ("me", "commands.me.usage"),
     MSG             ("msg", "commands.message.usage", null, null, "tell", "m", "w"),
     NEWS            ("news"),
