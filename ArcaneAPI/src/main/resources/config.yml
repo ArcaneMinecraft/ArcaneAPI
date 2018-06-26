@@ -1,7 +1,0 @@
-restapi:
-  # IP address to bind to
-  bind: 0.0.0.0
-  # Port to use
-  port: 80
-  # IP addresses to listen from/accept
-  whitelist: [localhost, 127.0.0.1]
