@@ -3,7 +3,7 @@ package com.arcaneminecraft.api;
 public enum BungeeCommandUsage {
     APPLY           ("apply", null, "arcane.command.apply", "Apply for the greylist"),
     BADGE           ("badge", "[badge name]", null, "Toggles or sets your tag", "b", "tag"),
-    BADGEADMIN      ("badgeadmin", "<>", "arcane.command.badgeadmin", "Administrative options for player tags"),
+    BADGEADMIN      ("badgeadmin", "<>", "arcane.command.badgeadmin", "Administrative options for player tags"), // TODO: Usage
     GREYLIST        ("greylist", null, "arcane.command.greylist"),
     FINDPLAYER      ("findplayer", "<part of name>", null, "Find player name from part of name", "find"),
     FIRSTSEEN       ("firstseen", "[player]", null, "Get the date when player first joined the game", "seenf"),

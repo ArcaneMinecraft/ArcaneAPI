@@ -7,15 +7,12 @@
  */
 package com.arcaneminecraft.api;
 
-import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.*;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.bukkit.Nameable;
-import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
-
-import net.md_5.bungee.api.ChatColor;
 
 public final class ArcaneText {
     public static BaseComponent url(String SpaceDelimitedString) {
@@ -50,34 +47,47 @@ public final class ArcaneText {
     }
 
     public static BaseComponent playerComponent(String name, String displayName, String uuid) {
+        return playerComponent(name, displayName, uuid, null);
+    }
+    public static BaseComponent playerComponent(String name, String displayName, String uuid, String detail) {
         BaseComponent ret = new TextComponent(displayName);
-        ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY, new ComponentBuilder("{name:\"" + name + "\", id:\"" + uuid + "\"}").create()));
+        ComponentBuilder hoverText = new ComponentBuilder(name).italic(false);
+
+        if (detail != null) {
+            hoverText.append(" ").append(detail).color(ChatColor.GRAY).italic(true);
+        }
+
+        hoverText.append("\n").append(uuid).reset();
+        ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText.create()));
         ret.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/msg " + name + " "));
         return ret;
     }
 
     public static BaseComponent playerComponentSpigot(org.bukkit.command.CommandSender sender) {
+        return playerComponentSpigot(sender, null);
+    }
+
+    public static BaseComponent playerComponentSpigot(org.bukkit.command.CommandSender sender, String detail) {
         if (!(sender instanceof Player)) {
             if (sender instanceof ConsoleCommandSender)
                 return new TextComponent("Server");
             return new TextComponent(((Nameable) sender).getCustomName());
         }
         Player p = (Player) sender;
-        BaseComponent ret = new TextComponent(p.getDisplayName());
-        ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY, new ComponentBuilder("{name:\"" + p.getName() + "\", id:\"" + p.getUniqueId() + "\"}").create()));
-        ret.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/msg " + p.getName() + " "));
-        return ret;
+        return playerComponent(p.getName(), p.getDisplayName(), p.getUniqueId().toString(), detail);
     }
 
     public static BaseComponent playerComponentBungee(net.md_5.bungee.api.CommandSender sender) {
+        return playerComponentBungee(sender, null);
+
+
+    }
+    public static BaseComponent playerComponentBungee(net.md_5.bungee.api.CommandSender sender, String detail) {
         if (!(sender instanceof ProxiedPlayer)) {
             return new TextComponent("Server");
         }
         ProxiedPlayer p = (ProxiedPlayer) sender;
-        BaseComponent ret = new TextComponent(p.getDisplayName());
-        ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY, new ComponentBuilder("{name:\"" + p.getName() + "\", id:\"" + p.getUniqueId() + "\"}").create()));
-        ret.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/msg " + p.getName() + " "));
-        return ret;
+        return playerComponent(p.getName(), p.getDisplayName(), p.getUniqueId().toString(), detail);
     }
 
     @Deprecated
