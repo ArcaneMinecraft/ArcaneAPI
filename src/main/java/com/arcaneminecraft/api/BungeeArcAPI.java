@@ -1,16 +1,8 @@
 package com.arcaneminecraft.api;
 
-import com.google.common.io.ByteStreams;
-import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.CommandSender;
-import net.md_5.bungee.api.chat.TranslatableComponent;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.Plugin;
-import net.md_5.bungee.config.ConfigurationProvider;
-import net.md_5.bungee.config.YamlConfiguration;
-
-import java.io.*;
 
 public class BungeeArcAPI extends Plugin {
 

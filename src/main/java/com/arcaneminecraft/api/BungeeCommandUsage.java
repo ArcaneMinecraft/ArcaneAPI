@@ -1,5 +1,6 @@
 package com.arcaneminecraft.api;
 
+@SuppressWarnings("unused")
 public enum BungeeCommandUsage {
     APPLY           ("apply", null, "arcane.command.apply", "Apply for the greylist"),
     BADGE           ("badge", "[badge name]", null, "Toggles or sets your tag", "b", "tag"),

@@ -2,6 +2,7 @@ package com.arcaneminecraft.api;
 
 import net.md_5.bungee.api.ChatColor;
 
+@SuppressWarnings("unused")
 public class ColorPalette {
     // Not set to final on purpose
     public static ChatColor HEADING = ChatColor.GOLD;
