@@ -101,15 +101,15 @@ public final class ArcaneText {
         if (detail == null) {
             // TODO: 1.13 might change show_entity hover for players.
             ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY,
-                    new ComponentBuilder("{name:\"" + name + "\", uuid:\"" + uuid + "\"}").create()
+                    new ComponentBuilder("{name:\"" + name + "\", id:\"" + uuid + "\"}").create()
             ));
         } else {
-            BaseComponent hoverDetails = new TextComponent(" " + detail + "\n");
-            hoverDetails.setColor(ChatColor.GRAY);
-            hoverDetails.setItalic(true);
-
             ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                    new BaseComponent[]{new TextComponent(name), hoverDetails, new TextComponent(uuid)}));
+                    new ComponentBuilder(name + " ").color(ChatColor.RESET) // Color is reset here because this keeps getting italicized
+                            .append(detail, ComponentBuilder.FormatRetention.NONE).italic(true).color(ChatColor.GRAY).append("\n")
+                            .append(uuid, ComponentBuilder.FormatRetention.NONE).create()
+            ));
+
         }
 
         ret.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/msg " + name + " "));
