@@ -97,14 +97,22 @@ public final class ArcaneText {
         }
 
         BaseComponent ret = new TextComponent(displayName);
-        ComponentBuilder hoverText = new ComponentBuilder(name).italic(false);
+        BaseComponent hoverName = new TextComponent(name);
+        BaseComponent hoverUUID = new TextComponent("\n" + uuid);
 
-        if (detail != null) {
-            hoverText.append(" ").append(detail).color(ChatColor.GRAY).italic(true);
+        BaseComponent[] hoverText;
+
+        if (detail == null) {
+            hoverText = new BaseComponent[]{hoverName, hoverUUID};
+        } else {
+            BaseComponent hoverDetails = new TextComponent(" " + detail);
+            hoverDetails.setColor(ChatColor.GRAY);
+            hoverDetails.setItalic(true);
+
+            hoverText = new BaseComponent[]{hoverName, hoverDetails, hoverUUID};
         }
 
-        hoverText.append("\n").append(uuid).reset();
-        ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText.create()));
+        ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText));
         ret.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/msg " + name + " "));
         return ret;
     }
@@ -205,9 +213,9 @@ public final class ArcaneText {
     public static BaseComponent numberOutOfRange(int n, int min, int max) {
         BaseComponent ret;
         if (n < min)
-            ret = new TranslatableComponent("commands.generic.num.tooSmall", n, min);
+            ret = new TranslatableComponent("commands.generic.num.tooSmall", String.valueOf(n), String.valueOf(min));
         else if (n > max)
-            ret = new TranslatableComponent("commands.generic.num.tooBig", n, max);
+            ret = new TranslatableComponent("commands.generic.num.tooBig", String.valueOf(n), String.valueOf(max));
         else
             return null;
 
