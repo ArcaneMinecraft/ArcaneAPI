@@ -97,22 +97,21 @@ public final class ArcaneText {
         }
 
         BaseComponent ret = new TextComponent(displayName);
-        BaseComponent hoverName = new TextComponent(name);
-        BaseComponent hoverUUID = new TextComponent("\n" + uuid);
-
-        BaseComponent[] hoverText;
 
         if (detail == null) {
-            hoverText = new BaseComponent[]{hoverName, hoverUUID};
+            // TODO: 1.13 might change show_entity hover for players.
+            ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY,
+                    new ComponentBuilder("{name:\"" + name + "\", uuid:\"" + uuid + "\"}").create()
+            ));
         } else {
-            BaseComponent hoverDetails = new TextComponent(" " + detail);
+            BaseComponent hoverDetails = new TextComponent(" " + detail + "\n");
             hoverDetails.setColor(ChatColor.GRAY);
             hoverDetails.setItalic(true);
 
-            hoverText = new BaseComponent[]{hoverName, hoverDetails, hoverUUID};
+            ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                    new BaseComponent[]{new TextComponent(name), hoverDetails, new TextComponent(uuid)}));
         }
 
-        ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText));
         ret.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/msg " + name + " "));
         return ret;
     }
