@@ -2,6 +2,9 @@ package com.arcaneminecraft.api;
 
 @SuppressWarnings("unused")
 public enum BungeeCommandUsage {
+    CREATIVE        ("creative", null, "bungeecord.server.creative", "Move to the creative server"),
+    SURVIVAL        ("survival", null, null, "Move to the survival server"),
+    EVENT           ("event", "[event name]", null, "Move to the event server"),
     APPLY           ("apply", null, "arcane.command.apply", "Apply for the greylist"),
     GREYLIST        ("greylist", null, "arcane.command.greylist"),
     BADGE           ("badge", "[badge name]", null, "Toggles or sets your tag", "b", "tag"),
