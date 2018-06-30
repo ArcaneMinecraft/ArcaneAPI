@@ -3,19 +3,22 @@ package com.arcaneminecraft.api;
 @SuppressWarnings("unused")
 public enum BungeeCommandUsage {
     APPLY           ("apply", null, "arcane.command.apply", "Apply for the greylist"),
+    GREYLIST        ("greylist", null, "arcane.command.greylist"),
     BADGE           ("badge", "[badge name]", null, "Toggles or sets your tag", "b", "tag"),
     BADGEADMIN      ("badgeadmin", "<>", "arcane.command.badgeadmin", "Administrative options for player tags"), // TODO: Usage
-    GREYLIST        ("greylist", null, "arcane.command.greylist"),
     FINDPLAYER      ("findplayer", "<part of name>", null, "Find player name from part of name", "find"),
     FIRSTSEEN       ("firstseen", "[player]", null, "Get the date when player first joined the game", "seenf"),
-    LINKS           ("links", null, "arcane.command.links", null, "link", "website", "forum", "discord"),
+    SEEN            ("seen", "<player>", null, "Get the date when player last joined the game"),
+    LINKS           ("links", null, "arcane.command.links"),
+    WEBSITE         ("website", null, "arcane.command.links"),
+    FORUM           ("forum", null, "arcane.command.links"),
+    DISCORD         ("discord", null, "arcane.command.links"),
     LIST            ("list"),
     ME              ("me", "commands.me.usage"),
     MSG             ("msg", "commands.message.usage", null, null, "tell", "m", "w"),
+    REPLY           ("reply", "<private message ...>", null, null, "r"),
     NEWS            ("news"),
     PING            ("ping", "[player]"),
-    REPLY           ("reply", "<private message ...>", null, null, "r"),
-    SEEN            ("seen", "<player>", null, "Get the date when player last joined the game"),
     SLAP            ("slap", "<player>", "arcane.command.slap"),
     STAFFCHAT       ("a", "<staff message ...>", "arcane.command.a"),
     STAFFCHATTOGGLE ("atoggle", null, "arcane.command.a", null, "at");
