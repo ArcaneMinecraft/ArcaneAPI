@@ -142,7 +142,7 @@ public final class ArcaneText {
         Entity e = (Entity)sender;
         BaseComponent ret = new TextComponent(e.getCustomName());
         ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY,
-                new ComponentBuilder("{name:\"" + e.getName() + "\", type:\"" + e.getType() + "\", uuid:\"" + e.getUniqueId() + "\"}").create()));
+                new ComponentBuilder("{name:\"" + e.getName() + "\", type:\"" + e.getType() + "\", id:\"" + e.getUniqueId() + "\"}").create()));
         return ret;
     }
 
