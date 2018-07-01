@@ -77,7 +77,7 @@ public final class ArcaneText {
      * @return Clickable name text as a component with hover text
      */
     public static BaseComponent playerComponent(String name, String displayName, String uuid) {
-        return playerComponent(name, displayName, uuid, null);
+        return playerComponent(name, displayName, uuid, null, true);
     }
 
     /**
@@ -87,7 +87,7 @@ public final class ArcaneText {
      * @param detail Details to display on hover in gray, italic text
      * @return Clickable name text as a component with hover text
      */
-    public static BaseComponent playerComponent(String name, String displayName, String uuid, String detail) {
+    public static BaseComponent playerComponent(String name, String displayName, String uuid, String detail, boolean clickable) {
         if (uuid == null || uuid.equals("")) {
             BaseComponent ret = new TextComponent(displayName);
             if (detail != null)
@@ -111,8 +111,9 @@ public final class ArcaneText {
             ));
 
         }
+        if (clickable)
+            ret.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/msg " + name + " "));
 
-        ret.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/msg " + name + " "));
         return ret;
     }
 
@@ -132,7 +133,7 @@ public final class ArcaneText {
     public static BaseComponent playerComponentSpigot(org.bukkit.command.CommandSender sender, String detail) {
         if (sender instanceof Player) {
             Player p = (Player) sender;
-            return playerComponent(p.getName(), p.getDisplayName(), p.getUniqueId().toString(), detail);
+            return playerComponent(p.getName(), p.getDisplayName(), p.getUniqueId().toString(), detail, true);
         }
         if (sender instanceof ConsoleCommandSender) {
             return new TextComponent("Server");
@@ -161,7 +162,7 @@ public final class ArcaneText {
     public static BaseComponent playerComponentBungee(net.md_5.bungee.api.CommandSender sender, String detail) {
         if (sender instanceof ProxiedPlayer) {
             ProxiedPlayer p = (ProxiedPlayer) sender;
-            return playerComponent(p.getName(), p.getDisplayName(), p.getUniqueId().toString(), detail);
+            return playerComponent(p.getName(), p.getDisplayName(), p.getUniqueId().toString(), detail, true);
         }
         return new TextComponent("Server");
     }
