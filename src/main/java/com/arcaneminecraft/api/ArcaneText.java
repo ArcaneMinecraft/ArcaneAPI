@@ -104,6 +104,17 @@ public final class ArcaneText {
      * @param detail Details to display on hover in gray, italic text
      * @return Clickable name text as a component with hover text
      */
+    public static BaseComponent playerComponent(String name, String displayName, String uuid, String detail) {
+        return playerComponent(name, displayName, uuid, detail, true);
+    }
+    /**
+     * @param name Name to set
+     * @param displayName Name to display
+     * @param uuid UUID to display
+     * @param detail Details to display on hover in gray, italic text
+     * @param clickable Makes the text activate with a click event
+     * @return Clickable name text as a component with hover text
+     */
     public static BaseComponent playerComponent(String name, String displayName, String uuid, String detail, boolean clickable) {
         if (uuid == null || uuid.equals("")) {
             BaseComponent ret = new TextComponent(displayName);
