@@ -16,6 +16,23 @@ import org.bukkit.entity.Player;
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public final class ArcaneText {
+    private static final String THIS_NETWORK_NAME_SHORT = "Arcane";
+    private static final String THIS_NETWORK_NAME = "Arcane Survival";
+
+    /**
+     * @return the full name of this network, "Arcane Survival".
+     */
+    public static String getThisNetworkName() {
+        return THIS_NETWORK_NAME;
+    }
+
+    /**
+     * @return the short name of this network, "Arcane".
+     */
+    public static String getThisNetworkNameShort() {
+        return THIS_NETWORK_NAME_SHORT;
+    }
+
     /**
      * Activates URL text by splitting string by space and analyzing each word for URL presence.
      * @param SpaceDelimitedString String with spaces that contains URL
