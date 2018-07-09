@@ -6,12 +6,11 @@ import net.md_5.bungee.api.chat.TranslatableComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.bukkit.entity.Player;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import java.util.UUID;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class ArcaneAPITest {
 
@@ -41,7 +40,7 @@ public class ArcaneAPITest {
 
     @Test
     public void playerComponentCreation() {
-        Player mp = Mockito.mock(Player.class);
+        Player mp = mock(Player.class);
         when(mp.getName()).thenReturn("SimonOrJ");
         when(mp.getDisplayName()).thenReturn("Simon Chuu");
         when(mp.getUniqueId()).thenReturn(UUID.fromString("39d83509-f85f-492a-ba8d-f54ad74c2682"));
@@ -51,7 +50,7 @@ public class ArcaneAPITest {
         assertEquals("/msg SimonOrJ ", mcPlayer.getClickEvent().getValue());
         assertEquals("Player entity hover", "{name:\"SimonOrJ\", id:\"39d83509-f85f-492a-ba8d-f54ad74c2682\"}", mcPlayer.getHoverEvent().getValue()[0].toPlainText());
 
-        ProxiedPlayer bp = Mockito.mock(ProxiedPlayer.class);
+        ProxiedPlayer bp = mock(ProxiedPlayer.class);
         when(bp.getName()).thenReturn("SimonOrJ");
         when(bp.getDisplayName()).thenReturn("Simon Chuu");
         when(bp.getUniqueId()).thenReturn(UUID.fromString("39d83509-f85f-492a-ba8d-f54ad74c2682"));
