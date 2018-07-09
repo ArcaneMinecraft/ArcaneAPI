@@ -6,16 +6,14 @@ import net.md_5.bungee.api.plugin.Plugin;
 
 public class BungeeArcAPI extends Plugin {
 
-
     @Override
     public void onEnable() {
-        getLogger().info("ArcaneAPI Loaded successfully.");
         getProxy().getPluginManager().registerCommand(this, new MainCommand());
     }
 
     public class MainCommand extends Command {
-        public MainCommand() {
-            super("arcaneapi", null, "arcane api");
+        private MainCommand() {
+            super("barcaneapi", null, "");
         }
 
         @Override
