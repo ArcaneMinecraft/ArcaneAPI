@@ -2,6 +2,7 @@ package com.arcaneminecraft.api;
 
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.TranslatableComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.bukkit.entity.Player;
 import org.junit.Test;
@@ -62,6 +63,19 @@ public class ArcaneAPITest {
         for (BaseComponent bc : bcPlayer.getHoverEvent().getValue())
             hoverValue.append(bc.toPlainText());
         assertEquals("Player custom detailed Hover", "SimonOrJ random detail\n39d83509-f85f-492a-ba8d-f54ad74c2682", hoverValue.toString());
+    }
+
+    @Test
+    public void usageText() {
+        assertEquals("Usage: /arcane <isBestServer>", ArcaneText.usage("/arcane <isBestServer>").toPlainText());
+        assertEquals("Usage: /me <action ...>", ArcaneText.usage("commands.me.usage").toPlainText());
+    }
+
+    @Test
+    public void outOfRangeTest() {
+        assertNull(ArcaneText.numberOutOfRange(1,1,2));
+        assertSame("commands.generic.num.tooBig",((TranslatableComponent) ArcaneText.numberOutOfRange(3,1,2)).getTranslate());
+        assertSame("commands.generic.num.tooSmall",((TranslatableComponent) ArcaneText.numberOutOfRange(0,1,2)).getTranslate());
     }
 
     @Test
