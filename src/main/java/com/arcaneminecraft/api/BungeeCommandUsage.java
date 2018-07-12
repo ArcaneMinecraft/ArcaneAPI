@@ -7,8 +7,8 @@ public enum BungeeCommandUsage {
     EVENT           ("event", "[event name]", null, "Move to the event server"),
     APPLY           ("apply", null, null, "Apply for the greylist"),
     GREYLIST        ("greylist", "<player ...>", "arcane.command.greylist"),
-    BADGE           ("badge", "[badge name]", null, "Toggles or sets your tag", "b", "tag"),
-    BADGEADMIN      ("badgeadmin", "<>", "arcane.command.badgeadmin", "Administrative options for player tags"), // TODO: Usage
+    BADGE           ("badge", "[hide|reset|prefix priority|prefix name]", null, "Change your tag - click on text to select", "b", "tag"),
+    BADGEADMIN      ("badgeadmin", "<clear|list|reset|set|setpriority|settemp> [player] ...", "arcane.command.badgeadmin", "Administrative options for player tags", "ba"),
     FINDPLAYER      ("findplayer", "<part of name>", null, "Find player name from part of name", "find"),
     FIRSTSEEN       ("firstseen", "[player]", null, "Get the date when player first joined the game", "seenf"),
     SEEN            ("seen", "<player>", null, "Get the date when player last joined the game"),
