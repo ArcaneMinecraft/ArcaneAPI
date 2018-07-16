@@ -14,22 +14,22 @@ import org.bukkit.entity.Player;
  *
  * @author Simon Chuu (SimonOrJ)
  */
-@SuppressWarnings({"WeakerAccess", "unused"})
-public final class ArcaneText {
-    private static final String THIS_NETWORK_NAME_SHORT = "Arcane";
-    private static final String THIS_NETWORK_NAME = "Arcane Survival";
+@SuppressWarnings({"unused"})
+public interface ArcaneText {
+    String THIS_NETWORK_NAME_SHORT = "Arcane";
+    String THIS_NETWORK_NAME = "Arcane Survival";
 
     /**
      * @return the full name of this network, "Arcane Survival".
      */
-    public static String getThisNetworkName() {
+    static String getThisNetworkName() {
         return THIS_NETWORK_NAME;
     }
 
     /**
      * @return the short name of this network, "Arcane".
      */
-    public static String getThisNetworkNameShort() {
+    static String getThisNetworkNameShort() {
         return THIS_NETWORK_NAME_SHORT;
     }
 
@@ -38,7 +38,7 @@ public final class ArcaneText {
      * @param SpaceDelimitedString String with spaces that contains URL
      * @return Text with activated (clickable) URL within words
      */
-    public static BaseComponent url(String SpaceDelimitedString) {
+    static BaseComponent url(String SpaceDelimitedString) {
         return url(SpaceDelimitedString.split(" "), 0);
     }
 
@@ -47,7 +47,7 @@ public final class ArcaneText {
      * @param ArrayWithLink String array that contains URL
      * @return Text with activated (clickable) URL within words
      */
-    public static BaseComponent url(String[] ArrayWithLink) {
+    static BaseComponent url(String[] ArrayWithLink) {
         return url(ArrayWithLink, 0);
     }
 
@@ -58,7 +58,7 @@ public final class ArcaneText {
      * @param fromIndex Index to make message from
      * @return Text with activated (clickable) URL within words
      */
-    public static BaseComponent url(String[] ArrayWithLink, int fromIndex) {
+    static BaseComponent url(String[] ArrayWithLink, int fromIndex) {
         BaseComponent ret = new TextComponent();
         for (int i = fromIndex; i < ArrayWithLink.length; i++) {
             if (i != fromIndex) ret.addExtra(" ");
@@ -77,13 +77,13 @@ public final class ArcaneText {
      * @param url String that is definitely a URL
      * @return Text with activated (clickable) URL
      */
-    public static BaseComponent urlSingle(String url) {
-        TextComponent ret = new TextComponent(
+    static BaseComponent urlSingle(String url) {
+        TextComponent ret = new TextComponent(url);
+        ret.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL,
                 url.startsWith("http://") || url.startsWith("https://")
                         ? url
                         : "http://" + url
-        );
-        ret.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url));
+        ));
         return ret;
     }
 
@@ -93,7 +93,7 @@ public final class ArcaneText {
      * @param uuid UUID to display
      * @return Clickable name text as a component with hover text
      */
-    public static BaseComponent playerComponent(String name, String displayName, String uuid) {
+    static BaseComponent playerComponent(String name, String displayName, String uuid) {
         return playerComponent(name, displayName, uuid, null, true);
     }
 
@@ -104,7 +104,7 @@ public final class ArcaneText {
      * @param detail Details to display on hover in gray, italic text
      * @return Clickable name text as a component with hover text
      */
-    public static BaseComponent playerComponent(String name, String displayName, String uuid, String detail) {
+    static BaseComponent playerComponent(String name, String displayName, String uuid, String detail) {
         return playerComponent(name, displayName, uuid, detail, true);
     }
     /**
@@ -115,7 +115,7 @@ public final class ArcaneText {
      * @param clickable Makes the text activate with a click event
      * @return Clickable name text as a component with hover text
      */
-    public static BaseComponent playerComponent(String name, String displayName, String uuid, String detail, boolean clickable) {
+    static BaseComponent playerComponent(String name, String displayName, String uuid, String detail, boolean clickable) {
         if (uuid == null || uuid.equals("")) {
             BaseComponent ret = new TextComponent(displayName);
             if (detail != null)
@@ -127,14 +127,22 @@ public final class ArcaneText {
         BaseComponent ret = new TextComponent(displayName);
 
         if (detail == null) {
-            // TODO: 1.13 might change show_entity hover for players.
-            ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY,
-                    new ComponentBuilder("{name:\"" + name + "\", id:\"" + uuid + "\"}").create()
+            // The following does not work properly with current MC 1.13-pre7.
+            //ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY,
+            //        new ComponentBuilder("{name:\"" + name + "\", type:\"minecraft:player\", id:" + uuid + "}").create()
+            //));
+            // BEGIN Temporary fix TODO:
+            ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                    new ComponentBuilder(name + "\n") // Color is reset here because this keeps getting italicized
+                            .append("Type: minecraft:player", ComponentBuilder.FormatRetention.NONE).append("\n")
+                            .append(uuid, ComponentBuilder.FormatRetention.NONE).create()
             ));
+            // END Temporary fix
         } else {
             ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                     new ComponentBuilder(name + " ").color(ChatColor.RESET) // Color is reset here because this keeps getting italicized
                             .append(detail, ComponentBuilder.FormatRetention.NONE).italic(true).color(ChatColor.GRAY).append("\n")
+                            .append("Type: minecraft:player", ComponentBuilder.FormatRetention.NONE).append("\n")
                             .append(uuid, ComponentBuilder.FormatRetention.NONE).create()
             ));
 
@@ -149,7 +157,7 @@ public final class ArcaneText {
      * @param sender Sender to make clickable component from
      * @return Clickable name text as a component with hover text
      */
-    public static BaseComponent playerComponentSpigot(org.bukkit.command.CommandSender sender) {
+    static BaseComponent playerComponentSpigot(org.bukkit.command.CommandSender sender) {
         return playerComponentSpigot(sender, null);
     }
 
@@ -158,7 +166,7 @@ public final class ArcaneText {
      * @param detail Details to display on hover in gray, italic text
      * @return Clickable name text as a component with hover text
      */
-    public static BaseComponent playerComponentSpigot(org.bukkit.command.CommandSender sender, String detail) {
+    static BaseComponent playerComponentSpigot(org.bukkit.command.CommandSender sender, String detail) {
         if (sender instanceof Player) {
             Player p = (Player) sender;
             return playerComponent(p.getName(), p.getDisplayName(), p.getUniqueId().toString(), detail, true);
@@ -178,7 +186,7 @@ public final class ArcaneText {
      * @param sender Sender to make clickable component from
      * @return Clickable name text as a component with hover text
      */
-    public static BaseComponent playerComponentBungee(net.md_5.bungee.api.CommandSender sender) {
+    static BaseComponent playerComponentBungee(net.md_5.bungee.api.CommandSender sender) {
         return playerComponentBungee(sender, null);
     }
 
@@ -187,7 +195,7 @@ public final class ArcaneText {
      * @param detail Details to display on hover in gray, italic text
      * @return Clickable name text as a component with hover text
      */
-    public static BaseComponent playerComponentBungee(net.md_5.bungee.api.CommandSender sender, String detail) {
+    static BaseComponent playerComponentBungee(net.md_5.bungee.api.CommandSender sender, String detail) {
         if (sender instanceof ProxiedPlayer) {
             ProxiedPlayer p = (ProxiedPlayer) sender;
             return playerComponent(p.getName(), p.getDisplayName(), p.getUniqueId().toString(), detail, true);
@@ -196,23 +204,11 @@ public final class ArcaneText {
     }
 
     /**
-     * @param translate Translatable node from Mojang's translation list
-     * @return Usage: "translated node"
-     * @deprecated use usage(BaseComponent usage) with TranslatableComponent instead
-     */
-    @Deprecated
-    public static BaseComponent usageTranslatable(String translate) {
-        BaseComponent ret = new TranslatableComponent("commands.generic.usage", new TranslatableComponent(translate));
-        ret.setColor(ChatColor.RED);
-        return ret;
-    }
-
-    /**
      * @param usage Usage
      * @return Usage: "translated node"
      */
-    public static BaseComponent usage(BaseComponent usage) {
-        BaseComponent ret = new TranslatableComponent("commands.generic.usage", usage);
+    static BaseComponent usage(BaseComponent usage) {
+        BaseComponent ret = new TranslatableComponent("Usage: %s", usage); // TODO: Find new translatable node
         ret.setColor(ChatColor.RED);
         return ret;
     }
@@ -221,12 +217,12 @@ public final class ArcaneText {
      * @param usage Usage in text
      * @return Usage: "text"
      */
-    public static BaseComponent usage(String usage) {
-        BaseComponent ret;
+    static BaseComponent usage(String usage) {
+        BaseComponent ret = new TextComponent("Usage: "); // TODO: find new translatable node
         if (usage.startsWith("commands."))
-            ret = new TranslatableComponent("commands.generic.usage", new TranslatableComponent(usage));
+            ret.addExtra(new TranslatableComponent(usage));
         else
-            ret = new TranslatableComponent("commands.generic.usage", usage);
+            ret.addExtra(usage);
         ret.setColor(ChatColor.RED);
         return ret;
     }
@@ -238,12 +234,12 @@ public final class ArcaneText {
      * @param max Maximum bound
      * @return Appropriate message if n is out of bounds, else null.
      */
-    public static BaseComponent numberOutOfRange(int n, int min, int max) {
+    static BaseComponent numberOutOfRange(int n, int min, int max) {
         BaseComponent ret;
         if (n < min)
-            ret = new TranslatableComponent("commands.generic.num.tooSmall", String.valueOf(n), String.valueOf(min));
+            ret = new TranslatableComponent("The number you have entered (%s) is too small, it must be at least %s", String.valueOf(n), String.valueOf(min)); // TODO: Update
         else if (n > max)
-            ret = new TranslatableComponent("commands.generic.num.tooBig", String.valueOf(n), String.valueOf(max));
+            ret = new TranslatableComponent("The number you have entered (%s) is too big, it must be at most %s", String.valueOf(n), String.valueOf(max)); // TODO: Update
         else
             return null;
 
@@ -255,8 +251,8 @@ public final class ArcaneText {
      * @param player Player name attempted to find
      * @return Player not found message
      */
-    public static BaseComponent playerNotFound(String player) {
-        BaseComponent ret = new TranslatableComponent("commands.generic.player.notFound", player);
+    static BaseComponent playerNotFound(String player) {
+        BaseComponent ret = new TranslatableComponent("Player '%s' cannot be found", player); // TODO: Update
         ret.setColor(ChatColor.RED);
         return ret;
     }
@@ -264,8 +260,8 @@ public final class ArcaneText {
     /**
      * @return TranslatableComponent of "commands.generic.permission"
      */
-    public static BaseComponent noPermissionMsg() {
-        BaseComponent ret = new TranslatableComponent("commands.generic.permission");
+    static BaseComponent noPermissionMsg() {
+        BaseComponent ret = new TextComponent("You do not have permission to use this command"); // TODO: Update?
         ret.setColor(ChatColor.RED);
         return ret;
     }
@@ -273,7 +269,7 @@ public final class ArcaneText {
     /**
      * @return TextComponent saying the action must be done by a player
      */
-    public static BaseComponent noConsoleMsg() {
+    static BaseComponent noConsoleMsg() {
         return new TextComponent("You must be a player.");
     }
 }
