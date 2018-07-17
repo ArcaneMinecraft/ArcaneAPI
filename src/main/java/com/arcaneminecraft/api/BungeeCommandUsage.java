@@ -21,7 +21,7 @@ public enum BungeeCommandUsage {
     MSG             ("msg", "commands.message.usage", null, null, "tell", "m", "w"),
     REPLY           ("reply", "<private message ...>", null, null, "r"),
     NEWS            ("news"),
-    OPTION          ("option", "<option name> [value]"),
+    OPTION          ("option", "<option name> [value]", null, null, "options"),
     PING            ("ping", "[player]"),
     SLAP            ("slap", "<player>", "arcane.command.slap"),
     STAFFCHAT       ("a", "<staff message ...>", "arcane.command.a"),
