@@ -127,11 +127,11 @@ public interface ArcaneText {
         BaseComponent ret = new TextComponent(displayName);
 
         if (detail == null) {
-            // The following does not work properly with current MC 1.13-pre7.
+            // TODO: The following does not work properly with current MC 1.13-pre7.
             //ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY,
             //        new ComponentBuilder("{name:\"" + name + "\", type:\"minecraft:player\", id:" + uuid + "}").create()
             //));
-            // BEGIN Temporary fix TODO:
+            // BEGIN Temporary fix
             ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
                     new ComponentBuilder(name + "\n") // Color is reset here because this keeps getting italicized
                             .append("Type: minecraft:player", ComponentBuilder.FormatRetention.NONE).append("\n")
@@ -208,7 +208,7 @@ public interface ArcaneText {
      * @return Usage: "translated node"
      */
     static BaseComponent usage(BaseComponent usage) {
-        BaseComponent ret = new TranslatableComponent("Usage: %s", usage); // TODO: Find new translatable node
+        BaseComponent ret = new TranslatableComponent("Usage: %s", usage); // There is no new translatable node
         ret.setColor(ChatColor.RED);
         return ret;
     }
@@ -218,7 +218,7 @@ public interface ArcaneText {
      * @return Usage: "text"
      */
     static BaseComponent usage(String usage) {
-        BaseComponent ret = new TextComponent("Usage: "); // TODO: find new translatable node
+        BaseComponent ret = new TextComponent("Usage: "); // There is no new translatable node
         if (usage.startsWith("commands."))
             ret.addExtra(new TranslatableComponent(usage));
         else
@@ -237,9 +237,9 @@ public interface ArcaneText {
     static BaseComponent numberOutOfRange(int n, int min, int max) {
         BaseComponent ret;
         if (n < min)
-            ret = new TranslatableComponent("The number you have entered (%s) is too small, it must be at least %s", String.valueOf(n), String.valueOf(min)); // TODO: Update
+            ret = new TranslatableComponent("argument.integer.low", min, n);
         else if (n > max)
-            ret = new TranslatableComponent("The number you have entered (%s) is too big, it must be at most %s", String.valueOf(n), String.valueOf(max)); // TODO: Update
+            ret = new TranslatableComponent("argument.integer.big", max, n);
         else
             return null;
 
@@ -250,18 +250,45 @@ public interface ArcaneText {
     /**
      * @param player Player name attempted to find
      * @return Player not found message
+     * @deprecated Player is no longer specified in default translation
      */
+    @Deprecated
     static BaseComponent playerNotFound(String player) {
-        BaseComponent ret = new TranslatableComponent("Player '%s' cannot be found", player); // TODO: Update
+        return playerNotFound();
+    }
+
+    /**
+     * @return Unknown player message
+     */
+    static BaseComponent playerNotFound() {
+        BaseComponent ret = new TranslatableComponent("argument.player.unknown");
         ret.setColor(ChatColor.RED);
         return ret;
     }
 
     /**
      * @return TranslatableComponent of "commands.generic.permission"
+     * @deprecated MC 1.13 no longer have "not enough permission" message. Use noCommandPermission() or argumentInvalid()
      */
+    @Deprecated
     static BaseComponent noPermissionMsg() {
-        BaseComponent ret = new TextComponent("You do not have permission to use this command"); // TODO: Update?
+        return noCommandPermission();
+    }
+
+    /**
+     * @return Unknown command or insufficient permissions
+     */
+    static BaseComponent noCommandPermission() {
+        BaseComponent ret = new TextComponent("commands.help.failed");
+        ret.setColor(ChatColor.RED);
+        return ret;
+    }
+
+    /**
+     * @return Incorrect argument for command
+     */
+    static BaseComponent argumentInvalid() {
+        BaseComponent ret = new TextComponent("command.unknown.argument");
         ret.setColor(ChatColor.RED);
         return ret;
     }
