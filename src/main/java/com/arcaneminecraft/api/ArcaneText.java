@@ -239,9 +239,9 @@ public interface ArcaneText {
     static BaseComponent numberOutOfRange(int n, int min, int max) {
         BaseComponent ret;
         if (n < min)
-            ret = new TranslatableComponent("argument.integer.low", min, n);
+            ret = new TranslatableComponent("argument.integer.low", String.valueOf(min), String.valueOf(n));
         else if (n > max)
-            ret = new TranslatableComponent("argument.integer.big", max, n);
+            ret = new TranslatableComponent("argument.integer.big", String.valueOf(max), String.valueOf(n));
         else
             return null;
 
