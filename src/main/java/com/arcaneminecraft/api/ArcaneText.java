@@ -116,6 +116,8 @@ public interface ArcaneText {
      * @return Clickable name text as a component with hover text
      */
     static BaseComponent playerComponent(String name, String displayName, String uuid, String detail, boolean clickable) {
+        if (displayName == null)
+            displayName = name;
         if (uuid == null || uuid.equals("")) {
             BaseComponent ret = new TextComponent(displayName);
             if (detail != null)
