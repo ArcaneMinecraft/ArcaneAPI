@@ -14,6 +14,8 @@ public enum BungeeCommandUsage {
     SEEN            ("seen", "<player>", "arcane.command.seen", "Get the date when player last joined the game"),
     LINKS           ("links", null, "arcane.command.links"),
     WEBSITE         ("website", null, "arcane.command.links"),
+    DONATE          ("donate", null, "arcane.command.links"),
+    RULES           ("rules", null, "arcane.command.links"),
     FORUM           ("forum", null, "arcane.command.links"),
     DISCORD         ("discord", "[link|unlink]", "arcane.command.discord"),
     LIST            ("list"),
@@ -24,6 +26,7 @@ public enum BungeeCommandUsage {
     OPTION          ("option", "[option name] [value]"),
     PING            ("ping", "[player]"),
     SLAP            ("slap", "<player>", "arcane.command.slap"),
+    SPY             ("spy", "<all|command|sign|xray> ...", "arcane.command.spy"),
     STAFFCHAT       ("a", "<staff message ...>", "arcane.command.a"),
     STAFFCHATTOGGLE ("atoggle", null, "arcane.command.a", null, "at");
 
