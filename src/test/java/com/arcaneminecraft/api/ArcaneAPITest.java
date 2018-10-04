@@ -10,7 +10,8 @@ import org.junit.Test;
 import java.util.UUID;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class ArcaneAPITest {
 
@@ -19,13 +20,15 @@ public class ArcaneAPITest {
         BaseComponent empty = ArcaneText.url("");
         BaseComponent not_url = ArcaneText.url("http:/test");
         BaseComponent url_dot = ArcaneText.url("arcaneminecraft.com");
+        BaseComponent rainbow_url = ArcaneText.url("\u00A71R\u00A72a\u00A73i\u00A74n\u00A75b\u00A76o\u00A77w\u00A78.\u00A79c\u00A7ao\u00A7bm");
         BaseComponent url_http_no_dot = ArcaneText.url("http://localhost");
         BaseComponent multiple_hyperlink = ArcaneText.url("https://arcaneminecraft.com arcaneminecraft.com http://arcaneminecraft.com");
         BaseComponent hyperlink_around_text = ArcaneText.url("Go to arcaneminecraft.com for fun vanilla experience! (or check out http://localhost too)");
 
-        assertNull("An empty string", empty.getExtra().get(0).getClickEvent());
+        assertNull("An empty string", empty.getExtra());
         assertNull("'http:/text' which is not a URL", not_url.getExtra().get(0).getClickEvent());
         assertNotNull("URL with dot", url_dot.getExtra().get(0).getClickEvent());
+        assertNotNull("URL With Colors", rainbow_url.getExtra().get(0).getClickEvent());
         assertNotNull("URL with http but no dot", url_http_no_dot.getExtra().get(0).getClickEvent());
 
         assertNotNull("Multiple hyperlinks", multiple_hyperlink.getExtra().get(0).getClickEvent());
@@ -33,9 +36,10 @@ public class ArcaneAPITest {
         assertNotNull("Multiple hyperlinks", multiple_hyperlink.getExtra().get(4).getClickEvent());
 
         assertNull("Text in hyperlink around text", hyperlink_around_text.getExtra().get(0).getClickEvent());
-        assertNotNull("Link in hyperlink around text", hyperlink_around_text.getExtra().get(4).getClickEvent());
-        assertNull("Link in hyperlink around text", hyperlink_around_text.getExtra().get(12).getClickEvent());
-        assertNotNull("Link in hyperlink around text", hyperlink_around_text.getExtra().get(20).getClickEvent());
+        assertNotNull("Link in hyperlink around text", hyperlink_around_text.getExtra().get(1).getClickEvent());
+        assertNull("Link in hyperlink around text", hyperlink_around_text.getExtra().get(2).getClickEvent());
+        assertNotNull("Link in hyperlink around text", hyperlink_around_text.getExtra().get(3).getClickEvent());
+        assertNull("Link in hyperlink around text", hyperlink_around_text.getExtra().get(4).getClickEvent());
     }
 
     @Test

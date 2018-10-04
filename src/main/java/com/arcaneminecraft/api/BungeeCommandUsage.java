@@ -26,7 +26,7 @@ public enum BungeeCommandUsage {
     OPTION          ("option", "[option name] [value]"),
     PING            ("ping", "[player]"),
     SLAP            ("slap", "<player>", "arcane.command.slap"),
-    SPY             ("spy", "<all|command|sign|xray> ...", "arcane.command.spy"),
+    SPY             ("spy", "<toggles|command|sign|xray> ...", "arcane.command.spy"),
     STAFFCHAT       ("a", "<staff message ...>", "arcane.command.a"),
     STAFFCHATTOGGLE ("atoggle", null, "arcane.command.a", null, "at");
 

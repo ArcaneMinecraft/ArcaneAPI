@@ -7,6 +7,9 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
+import java.util.Arrays;
+import java.util.Iterator;
+
 /**
  * ArcaneCommons Class.
  * This class is to be shared between all the other plugins, favorably with
@@ -59,16 +62,32 @@ public interface ArcaneText {
      * @return Text with activated (clickable) URL within words
      */
     static BaseComponent url(String[] ArrayWithLink, int fromIndex) {
-        BaseComponent ret = new TextComponent();
+        ComponentBuilder cb = new ComponentBuilder("");
+        StringBuilder sb = new StringBuilder();
         for (int i = fromIndex; i < ArrayWithLink.length; i++) {
-            if (i != fromIndex) ret.addExtra(" ");
+            if (i != fromIndex) sb.append(' ');
+
             //noinspection RegExpRedundantEscape (the extra escapes are required!!!)
             if (ArrayWithLink[i].matches(".+\\..+|http(s?):\\/\\/.+")) {
-                ret.addExtra(urlSingle(ArrayWithLink[i]));
+                cb.append(TextComponent.fromLegacyText(sb.toString()), ComponentBuilder.FormatRetention.FORMATTING);
+
+                cb.append(urlSingle(ArrayWithLink[i]));
+
+                sb = new StringBuilder();
             } else {
-                ret.addExtra(ArrayWithLink[i]);
+                sb.append(ArrayWithLink[i]);
             }
         }
+        if (sb.length() != 0)
+            cb.append(TextComponent.fromLegacyText(sb.toString()), ComponentBuilder.FormatRetention.FORMATTING);
+
+        Iterator<BaseComponent> i = Arrays.asList(cb.create()).iterator();
+        BaseComponent ret = i.next();
+        i.forEachRemaining(c -> {
+            if (!c.toPlainText().isEmpty())
+                ret.addExtra(c);
+        });
+
         return ret;
     }
 
@@ -78,11 +97,40 @@ public interface ArcaneText {
      * @return Text with activated (clickable) URL
      */
     static BaseComponent urlSingle(String url) {
-        TextComponent ret = new TextComponent(url);
+        String u = ChatColor.stripColor(url);
+        String d;
+        if (u.length() > 35) {
+            int first = 29 + url.length() - u.length();
+            if (url.charAt(first - 1) == '\u00A7')
+                first++;
+            int last = url.length() - 6;
+            if (url.charAt(last - 1) == '\u00A7')
+                last--;
+            d = url.substring(0, first);
+            d += "\u2026";
+            d += url.substring(last);
+        } else {
+            d = url;
+        }
+
+        BaseComponent ret;
+        BaseComponent[] lt = TextComponent.fromLegacyText(d);
+        if (lt.length == 1) {
+            ret = lt[0];
+        } else {
+            Iterator<BaseComponent> i = Arrays.asList(lt).iterator();
+            ret = i.next();
+            i.forEachRemaining(c -> {
+                c.setClickEvent(null);
+                if (!c.toPlainText().isEmpty())
+                    ret.addExtra(c);
+            });
+        }
+
         ret.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL,
-                url.startsWith("http://") || url.startsWith("https://")
-                        ? url
-                        : "http://" + url
+                u.startsWith("http://") || u.startsWith("https://")
+                        ? u
+                        : "http://" + u
         ));
         return ret;
     }
@@ -127,6 +175,7 @@ public interface ArcaneText {
         }
 
         BaseComponent ret = new TextComponent(displayName);
+        boolean fromDiscord = detail != null && detail.equalsIgnoreCase("Server: Discord");
 
         if (detail == null) {
             // TODO: The following does not work properly with current MC 1.13-pre7.
@@ -141,15 +190,18 @@ public interface ArcaneText {
             ));
             // END Temporary fix
         } else {
-            ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                    new ComponentBuilder(name + " ").color(ChatColor.RESET) // Color is reset here because this keeps getting italicized
-                            .append(detail, ComponentBuilder.FormatRetention.NONE).italic(true).color(ChatColor.GRAY).append("\n")
-                            .append("Type: minecraft:player", ComponentBuilder.FormatRetention.NONE).append("\n")
-                            .append(uuid, ComponentBuilder.FormatRetention.NONE).create()
-            ));
+            ComponentBuilder cb = new ComponentBuilder(name + " ").color(ChatColor.RESET) // Color is reset here because this keeps getting italicized
+                    .append(detail, ComponentBuilder.FormatRetention.NONE).italic(true).color(ChatColor.GRAY).append("\n");
+
+            if (!fromDiscord)
+                cb.append("Type: minecraft:player", ComponentBuilder.FormatRetention.NONE).append("\n");
+
+            cb.append(uuid, ComponentBuilder.FormatRetention.NONE);
+
+            ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, cb.create()));
 
         }
-        if (clickable)
+        if (clickable && !fromDiscord)
             ret.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/msg " + name + " "));
 
         return ret;
