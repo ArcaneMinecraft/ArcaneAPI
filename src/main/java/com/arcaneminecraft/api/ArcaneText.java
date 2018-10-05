@@ -1,3 +1,15 @@
+package com.arcaneminecraft.api;
+
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.*;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
+import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
+
+import java.util.Arrays;
+import java.util.Iterator;
+
 /**
  * ArcaneCommons Class.
  * This class is to be shared between all the other plugins, favorably with
@@ -5,120 +17,340 @@
  *
  * @author Simon Chuu (SimonOrJ)
  */
-package com.arcaneminecraft.api;
+@SuppressWarnings({"unused"})
+public interface ArcaneText {
+    String THIS_NETWORK_NAME_SHORT = "Arcane";
+    String THIS_NETWORK_NAME = "Arcane Survival";
 
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.*;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
-import org.bukkit.Nameable;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.entity.Player;
+    /**
+     * @return the full name of this network, "Arcane Survival".
+     */
+    static String getThisNetworkName() {
+        return THIS_NETWORK_NAME;
+    }
 
-import net.md_5.bungee.api.ChatColor;
+    /**
+     * @return the short name of this network, "Arcane".
+     */
+    static String getThisNetworkNameShort() {
+        return THIS_NETWORK_NAME_SHORT;
+    }
 
-public final class ArcaneText {
-    public static BaseComponent url(String SpaceDelimitedString) {
+    /**
+     * Activates URL text by splitting string by space and analyzing each word for URL presence.
+     * @param SpaceDelimitedString String with spaces that contains URL
+     * @return Text with activated (clickable) URL within words
+     */
+    static BaseComponent url(String SpaceDelimitedString) {
         return url(SpaceDelimitedString.split(" "), 0);
     }
 
-    public static BaseComponent url(String[] ArrayWithLink) {
+    /**
+     * Activates URL text by analyzing each word for URL presence.
+     * @param ArrayWithLink String array that contains URL
+     * @return Text with activated (clickable) URL within words
+     */
+    static BaseComponent url(String[] ArrayWithLink) {
         return url(ArrayWithLink, 0);
     }
 
-    public static BaseComponent url(String[] ArrayWithLink, int fromIndex) {
-        BaseComponent ret = new TextComponent();
+    /**
+     * Activates URL text by analyzing each word for URL presence, starting from specified index.
+     * Especially useful for command entries where message doesn't begin at first index of array.
+     * @param ArrayWithLink String array that contains URL
+     * @param fromIndex Index to make message from
+     * @return Text with activated (clickable) URL within words
+     */
+    static BaseComponent url(String[] ArrayWithLink, int fromIndex) {
+        ComponentBuilder cb = new ComponentBuilder("");
+        StringBuilder sb = new StringBuilder();
         for (int i = fromIndex; i < ArrayWithLink.length; i++) {
-            if (i != fromIndex) ret.addExtra(" ");
+            if (i != fromIndex) sb.append(' ');
+
+            //noinspection RegExpRedundantEscape (the extra escapes are required!!!)
             if (ArrayWithLink[i].matches(".+\\..+|http(s?):\\/\\/.+")) {
-                ret.addExtra(urlSingle(ArrayWithLink[i]));
+                cb.append(TextComponent.fromLegacyText(sb.toString()), ComponentBuilder.FormatRetention.FORMATTING);
+
+                cb.append(urlSingle(ArrayWithLink[i]));
+
+                sb = new StringBuilder();
             } else {
-                ret.addExtra(ArrayWithLink[i]);
+                sb.append(ArrayWithLink[i]);
             }
         }
+        if (sb.length() != 0)
+            cb.append(TextComponent.fromLegacyText(sb.toString()), ComponentBuilder.FormatRetention.FORMATTING);
+
+        Iterator<BaseComponent> i = Arrays.asList(cb.create()).iterator();
+        BaseComponent ret = i.next();
+        i.forEachRemaining(c -> {
+            if (!c.toPlainText().isEmpty())
+                ret.addExtra(c);
+        });
+
         return ret;
     }
 
-    public static BaseComponent urlSingle(String url) {
-        TextComponent ret = new TextComponent(
-                url.startsWith("http://") || url.startsWith("https://")
-                        ? url
-                        : "http://" + url
-        );
-        ret.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url));
-        return ret;
-    }
-
-    public static BaseComponent playerComponent(String name, String displayName, String uuid) {
-        BaseComponent ret = new TextComponent(displayName);
-        ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY, new ComponentBuilder("{name:\"" + name + "\", id:\"" + uuid + "\"}").create()));
-        ret.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/msg " + name + " "));
-        return ret;
-    }
-
-    public static BaseComponent playerComponentSpigot(org.bukkit.command.CommandSender sender) {
-        if (!(sender instanceof Player)) {
-            if (sender instanceof ConsoleCommandSender)
-                return new TextComponent("Server");
-            return new TextComponent(((Nameable) sender).getCustomName());
+    /**
+     * Activates string as a clickable URL.
+     * @param url String that is definitely a URL
+     * @return Text with activated (clickable) URL
+     */
+    static BaseComponent urlSingle(String url) {
+        String u = ChatColor.stripColor(url);
+        String d;
+        if (u.length() > 35) {
+            int first = 29 + url.length() - u.length();
+            if (url.charAt(first - 1) == '\u00A7')
+                first++;
+            int last = url.length() - 6;
+            if (url.charAt(last - 1) == '\u00A7')
+                last--;
+            d = url.substring(0, first);
+            d += "\u2026";
+            d += url.substring(last);
+        } else {
+            d = url;
         }
-        Player p = (Player) sender;
-        BaseComponent ret = new TextComponent(p.getDisplayName());
-        ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY, new ComponentBuilder("{name:\"" + p.getName() + "\", id:\"" + p.getUniqueId() + "\"}").create()));
-        ret.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/msg " + p.getName() + " "));
+
+        BaseComponent ret;
+        BaseComponent[] lt = TextComponent.fromLegacyText(d);
+        if (lt.length == 1) {
+            ret = lt[0];
+        } else {
+            Iterator<BaseComponent> i = Arrays.asList(lt).iterator();
+            ret = i.next();
+            i.forEachRemaining(c -> {
+                c.setClickEvent(null);
+                if (!c.toPlainText().isEmpty())
+                    ret.addExtra(c);
+            });
+        }
+
+        ret.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL,
+                u.startsWith("http://") || u.startsWith("https://")
+                        ? u
+                        : "http://" + u
+        ));
         return ret;
     }
 
-    public static BaseComponent playerComponentBungee(net.md_5.bungee.api.CommandSender sender) {
-        if (!(sender instanceof ProxiedPlayer)) {
+    /**
+     * @param name Name to set
+     * @param displayName Name to display
+     * @param uuid UUID to display
+     * @return Clickable name text as a component with hover text
+     */
+    static BaseComponent playerComponent(String name, String displayName, String uuid) {
+        return playerComponent(name, displayName, uuid, null, true);
+    }
+
+    /**
+     * @param name Name to set
+     * @param displayName Name to display
+     * @param uuid UUID to display
+     * @param detail Details to display on hover in gray, italic text
+     * @return Clickable name text as a component with hover text
+     */
+    static BaseComponent playerComponent(String name, String displayName, String uuid, String detail) {
+        return playerComponent(name, displayName, uuid, detail, true);
+    }
+    /**
+     * @param name Name to set
+     * @param displayName Name to display
+     * @param uuid UUID to display
+     * @param detail Details to display on hover in gray, italic text
+     * @param clickable Makes the text activate with a click event
+     * @return Clickable name text as a component with hover text
+     */
+    static BaseComponent playerComponent(String name, String displayName, String uuid, String detail, boolean clickable) {
+        if (displayName == null)
+            displayName = name;
+        if (uuid == null || uuid.equals("")) {
+            BaseComponent ret = new TextComponent(displayName);
+            if (detail != null)
+                ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                        new ComponentBuilder(detail).color(ChatColor.GRAY).italic(true).create()));
+            return ret;
+        }
+
+        BaseComponent ret = new TextComponent(displayName);
+        boolean fromDiscord = detail != null && detail.equalsIgnoreCase("Server: Discord");
+
+        if (detail == null) {
+            // TODO: The following does not work properly with current MC 1.13-pre7.
+            //ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY,
+            //        new ComponentBuilder("{name:\"" + name + "\", type:\"minecraft:player\", id:" + uuid + "}").create()
+            //));
+            // BEGIN Temporary fix
+            ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                    new ComponentBuilder(name + "\n") // Color is reset here because this keeps getting italicized
+                            .append("Type: minecraft:player", ComponentBuilder.FormatRetention.NONE).append("\n")
+                            .append(uuid, ComponentBuilder.FormatRetention.NONE).create()
+            ));
+            // END Temporary fix
+        } else {
+            ComponentBuilder cb = new ComponentBuilder(name + " ").color(ChatColor.RESET) // Color is reset here because this keeps getting italicized
+                    .append(detail, ComponentBuilder.FormatRetention.NONE).italic(true).color(ChatColor.GRAY).append("\n");
+
+            if (!fromDiscord)
+                cb.append("Type: minecraft:player", ComponentBuilder.FormatRetention.NONE).append("\n");
+
+            cb.append(uuid, ComponentBuilder.FormatRetention.NONE);
+
+            ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, cb.create()));
+
+        }
+        if (clickable && !fromDiscord)
+            ret.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/msg " + name + " "));
+
+        return ret;
+    }
+
+    /**
+     * @param sender Sender to make clickable component from
+     * @return Clickable name text as a component with hover text
+     */
+    static BaseComponent playerComponentSpigot(org.bukkit.command.CommandSender sender) {
+        return playerComponentSpigot(sender, null);
+    }
+
+    /**
+     * @param sender Sender to make clickable component from
+     * @param detail Details to display on hover in gray, italic text
+     * @return Clickable name text as a component with hover text
+     */
+    static BaseComponent playerComponentSpigot(org.bukkit.command.CommandSender sender, String detail) {
+        if (sender instanceof Player) {
+            Player p = (Player) sender;
+            return playerComponent(p.getName(), p.getDisplayName(), p.getUniqueId().toString(), detail, true);
+        }
+        if (sender instanceof ConsoleCommandSender) {
             return new TextComponent("Server");
         }
-        ProxiedPlayer p = (ProxiedPlayer) sender;
-        BaseComponent ret = new TextComponent(p.getDisplayName());
-        ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY, new ComponentBuilder("{name:\"" + p.getName() + "\", id:\"" + p.getUniqueId() + "\"}").create()));
-        ret.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/msg " + p.getName() + " "));
+
+        Entity e = (Entity)sender;
+        BaseComponent ret = new TextComponent(e.getCustomName());
+        ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY,
+                new ComponentBuilder("{name:\"" + e.getName() + "\", type:\"" + e.getType() + "\", id:\"" + e.getUniqueId() + "\"}").create()));
         return ret;
     }
 
-    @Deprecated
-    public static BaseComponent usageTranslatable(String translate) {
-        BaseComponent ret = new TranslatableComponent("commands.generic.usage", new TranslatableComponent(translate));
+    /**
+     * @param sender Sender to make clickable component from
+     * @return Clickable name text as a component with hover text
+     */
+    static BaseComponent playerComponentBungee(net.md_5.bungee.api.CommandSender sender) {
+        return playerComponentBungee(sender, null);
+    }
+
+    /**
+     * @param sender Sender to make clickable component from
+     * @param detail Details to display on hover in gray, italic text
+     * @return Clickable name text as a component with hover text
+     */
+    static BaseComponent playerComponentBungee(net.md_5.bungee.api.CommandSender sender, String detail) {
+        if (sender instanceof ProxiedPlayer) {
+            ProxiedPlayer p = (ProxiedPlayer) sender;
+            return playerComponent(p.getName(), p.getDisplayName(), p.getUniqueId().toString(), detail, true);
+        }
+        return new TextComponent("Server");
+    }
+
+    /**
+     * @param usage Usage
+     * @return Usage: "translated node"
+     */
+    static BaseComponent usage(BaseComponent usage) {
+        BaseComponent ret = new TranslatableComponent("Usage: %s", usage); // There is no new translatable node
         ret.setColor(ChatColor.RED);
         return ret;
     }
 
-    public static BaseComponent usage(String usage) {
-        BaseComponent ret;
+    /**
+     * @param usage Usage in text
+     * @return Usage: "text"
+     */
+    static BaseComponent usage(String usage) {
+        BaseComponent ret = new TextComponent("Usage: "); // There is no new translatable node
         if (usage.startsWith("commands."))
-            ret = new TranslatableComponent("commands.generic.usage", new TranslatableComponent(usage));
+            ret.addExtra(new TranslatableComponent(usage));
         else
-            ret = new TranslatableComponent("commands.generic.usage", usage);
-        ret.setColor(ChatColor.RED);
-        return ret;
-    }
-
-    public static BaseComponent playerNotFound(String player) {
-        BaseComponent ret = new TranslatableComponent("commands.generic.player.notFound", player);
+            ret.addExtra(usage);
         ret.setColor(ChatColor.RED);
         return ret;
     }
 
     /**
-     * Generic no permission message
+     * Checks if the number if greater than or less than min or max, then sends appropriate text.
+     * @param n Number to check
+     * @param min Minimum bound
+     * @param max Maximum bound
+     * @return Appropriate message if n is out of bounds, else null.
+     */
+    static BaseComponent numberOutOfRange(int n, int min, int max) {
+        BaseComponent ret;
+        if (n < min)
+            ret = new TranslatableComponent("argument.integer.low", String.valueOf(min), String.valueOf(n));
+        else if (n > max)
+            ret = new TranslatableComponent("argument.integer.big", String.valueOf(max), String.valueOf(n));
+        else
+            return null;
+
+        ret.setColor(ChatColor.RED);
+        return ret;
+    }
+
+    /**
+     * @param player Player name attempted to find
+     * @return Player not found message
+     * @deprecated Player is no longer specified in default translation
+     */
+    @Deprecated
+    static BaseComponent playerNotFound(String player) {
+        return playerNotFound();
+    }
+
+    /**
+     * @return Unknown player message
+     */
+    static BaseComponent playerNotFound() {
+        BaseComponent ret = new TranslatableComponent("argument.player.unknown");
+        ret.setColor(ChatColor.RED);
+        return ret;
+    }
+
+    /**
      * @return TranslatableComponent of "commands.generic.permission"
+     * @deprecated MC 1.13 no longer have "not enough permission" message. Use noCommandPermission() or argumentInvalid()
      */
-    public static BaseComponent noPermissionMsg() {
-        BaseComponent ret = new TranslatableComponent("commands.generic.permission");
+    @Deprecated
+    static BaseComponent noPermissionMsg() {
+        return noCommandPermission();
+    }
+
+    /**
+     * @return Unknown command or insufficient permissions
+     */
+    static BaseComponent noCommandPermission() {
+        BaseComponent ret = new TextComponent("commands.help.failed");
         ret.setColor(ChatColor.RED);
         return ret;
     }
 
     /**
-     * Returns a "no-console" message
-     * @return TextComponent saying player required
+     * @return Incorrect argument for command
      */
-    public static BaseComponent noConsoleMsg() {
-        BaseComponent ret = new TextComponent("You must be a player.");
+    static BaseComponent argumentInvalid() {
+        BaseComponent ret = new TextComponent("command.unknown.argument");
+        ret.setColor(ChatColor.RED);
         return ret;
+    }
+
+    /**
+     * @return TextComponent saying the action must be done by a player
+     */
+    static BaseComponent noConsoleMsg() {
+        return new TextComponent("You must be a player.");
     }
 }

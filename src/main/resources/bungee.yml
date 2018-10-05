@@ -1,5 +1,5 @@
 name: ArcaneAPI
 main: com.arcaneminecraft.api.BungeeArcAPI
-version: ${project.version}
+version: @version@
 description: Arcane's Color, Web, and Utility API
-author: SimonOrJ
+author: Arcane Survival
