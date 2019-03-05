@@ -87,12 +87,18 @@ public interface ArcaneText {
         for (int i = fromIndex; i < ArrayWithLink.length; i++) {
             if (i != fromIndex) sb.append(' ');
 
-            //noinspection RegExpRedundantEscape (the extra escapes are required!!!)
-            if (ArrayWithLink[i].matches(".+\\..+|http(s?):\\/\\/.+")) {
+            if (ArrayWithLink[i].matches("\\S+\\.\\S+|http(s?)://\\S+")) {
+                cb.append(TextComponent.fromLegacyText(sb.toString()), ComponentBuilder.FormatRetention.FORMATTING);
+                cb.append(urlSingle(ArrayWithLink[i]));
+                sb = new StringBuilder();
+            } else if (ArrayWithLink[i].matches("/?r/\\S+")) {
+                // Reddit
                 cb.append(TextComponent.fromLegacyText(sb.toString()), ComponentBuilder.FormatRetention.FORMATTING);
 
-                cb.append(urlSingle(ArrayWithLink[i]));
+                String sr = ChatColor.stripColor(ArrayWithLink[i]);
+                String url = "https://reddit.com" + (sr.startsWith("/") ? "" : "/") + sr;
 
+                cb.append(urlSingleSpecial(ArrayWithLink[i], url));
                 sb = new StringBuilder();
             } else {
                 sb.append(ArrayWithLink[i]);
@@ -119,6 +125,8 @@ public interface ArcaneText {
     static BaseComponent urlSingle(String url) {
         String u = ChatColor.stripColor(url);
         String d;
+
+        // Shorten URL text if too long
         if (u.length() > 35) {
             int first = 29 + url.length() - u.length();
             if (url.charAt(first - 1) == '\u00A7')
@@ -133,8 +141,19 @@ public interface ArcaneText {
             d = url;
         }
 
+        return urlSingleSpecial(d, u);
+    }
+
+    /**
+     * Activates string as a clickable URL.
+     * @param text The text
+     * @param url String that is definitely a URL
+     * @return Text with activated (clickable) URL
+     */
+    static BaseComponent urlSingleSpecial(String text, String url) {
         BaseComponent ret;
-        BaseComponent[] lt = TextComponent.fromLegacyText(d);
+        BaseComponent[] lt = TextComponent.fromLegacyText(text);
+
         if (lt.length == 1) {
             ret = lt[0];
         } else {
@@ -148,9 +167,9 @@ public interface ArcaneText {
         }
 
         ret.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL,
-                u.startsWith("http://") || u.startsWith("https://")
-                        ? u
-                        : "http://" + u
+                url.startsWith("http://") || url.startsWith("https://")
+                        ? url
+                        : "http://" + url
         ));
         return ret;
     }
