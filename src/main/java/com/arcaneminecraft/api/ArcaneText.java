@@ -9,6 +9,8 @@ import org.bukkit.entity.Player;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  * ArcaneCommons Class.
@@ -21,6 +23,24 @@ import java.util.Iterator;
 public interface ArcaneText {
     String THIS_NETWORK_NAME_SHORT = "Arcane";
     String THIS_NETWORK_NAME = "Arcane Survival";
+
+    /**
+     * Gets string in translated form.
+     * @param locale Language locale for the message; null for default.
+     * @param translatable Translatable String
+     * @param args arguments in case of  placeholders(%s) to replace
+     * @return the translated form of string.
+     */
+    static BaseComponent translatable(Locale locale, String translatable, Object... args) {
+        String msg = locale == null
+                ? ResourceBundle.getBundle("i18n.Messages").getString(translatable)
+                : ResourceBundle.getBundle("i18n.Messages", locale).getString(translatable);
+
+        if (args.length == 0)
+            return new TextComponent(msg);
+        else
+            return new TranslatableComponent(msg, args);
+    }
 
     /**
      * @return the full name of this network, "Arcane Survival".
