@@ -12,4 +12,5 @@ public interface ArcaneColor {
     ChatColor DONOR = ChatColor.DARK_AQUA;
     ChatColor RESET = ChatColor.RESET;
     ChatColor META = ChatColor.YELLOW;
+    ChatColor LIST = ChatColor.GREEN;
 }
