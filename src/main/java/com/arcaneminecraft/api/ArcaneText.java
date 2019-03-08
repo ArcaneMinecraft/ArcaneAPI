@@ -3,6 +3,7 @@ package com.arcaneminecraft.api;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.*;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import org.apache.commons.lang.math.RandomUtils;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -35,6 +36,32 @@ public interface ArcaneText {
         String msg = locale == null
                 ? ResourceBundle.getBundle("i18n.Messages").getString(translatable)
                 : ResourceBundle.getBundle("i18n.Messages", locale).getString(translatable);
+
+        if (args.length == 0)
+            return new TextComponent(msg);
+        else
+            return new TranslatableComponent(msg, args);
+    }
+
+    static String translatableString(Locale locale, String translatable) {
+        return locale == null
+                ? ResourceBundle.getBundle("i18n.Messages").getString(translatable)
+                : ResourceBundle.getBundle("i18n.Messages", locale).getString(translatable);
+    }
+
+    /**
+     * Gets string chosen at random from list in translated form.
+     * @param locale Language locale for the message; null for default.
+     * @param translatable Translatable String Array (comma-spliced)
+     * @param args arguments in case of  placeholders(%s) to replace
+     * @return the translated form of string.
+     */
+    static BaseComponent translatableListRandom(Locale locale, String translatable, Object... args) {
+        String[] msgs = locale == null
+                ? ResourceBundle.getBundle("i18n.Messages").getStringArray(translatable)
+                : ResourceBundle.getBundle("i18n.Messages", locale).getStringArray(translatable);
+
+        String msg = msgs[RandomUtils.nextInt(msgs.length)];
 
         if (args.length == 0)
             return new TextComponent(msg);
