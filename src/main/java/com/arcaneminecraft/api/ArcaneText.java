@@ -8,10 +8,9 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.ResourceBundle;
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.util.*;
 
 /**
  * ArcaneCommons Class.
@@ -321,6 +320,133 @@ public interface ArcaneText {
             return playerComponent(p.getName(), p.getDisplayName(), p.getUniqueId().toString(), detail, true);
         }
         return new TextComponent("Server");
+    }
+
+    /**
+     * This calculates second difference and whether the difference is in the past on its own.
+     * @param time Timestamp to translate into a string
+     * @param locale Locale of the time
+     * @param timeZone TimeZone of the player
+     * @param focusColor The ChatColor of the focus parts
+     * @return Parsed time information (relative time if less than 7 days ago)
+     */
+    static BaseComponent timeText(Timestamp time, Locale locale, TimeZone timeZone, ChatColor focusColor) {
+        // difference in seconds
+        int diff = (int) ((System.currentTimeMillis() - time.getTime()) / 1000);
+        boolean past;
+        if (diff < 0) {
+            past = false;
+            diff = Math.abs(diff);
+        } else {
+            past = true;
+        }
+        return timeText(time, diff, past, locale, timeZone, focusColor);
+    }
+
+    /**
+     * This calculates the timestamp on its own.
+     * @param diff Time difference in seconds
+     * @param past If the time was in past
+     * @param locale Locale of the time
+     * @param timeZone TimeZone of the player
+     * @param focusColor The ChatColor of the focus parts
+     * @return Parsed time information (relative time if less than 7 days ago)
+     */
+    static BaseComponent timeText(int diff, boolean past, Locale locale, TimeZone timeZone, ChatColor focusColor) {
+        long ms = diff * 1000;
+
+        if (past)
+            ms = System.currentTimeMillis() - ms;
+        else
+            ms = System.currentTimeMillis() + ms;
+
+        Timestamp time = new Timestamp(ms);
+        return timeText(time, diff, past, locale, timeZone, focusColor);
+    }
+
+    /**
+     * @param time Timestamp to translate into a string
+     * @param diff Time difference in seconds
+     * @param past If the time was in past
+     * @param locale Locale of the time
+     * @param timeZone TimeZone of the player
+     * @param focusColor The ChatColor of the focus parts
+     * @return Parsed time information (relative time if less than 7 days ago)
+     */
+    static BaseComponent timeText(Timestamp time, int diff, boolean past, Locale locale, TimeZone timeZone, ChatColor focusColor) {
+        TimeZone zone = timeZone == null ? TimeZone.getDefault() : timeZone;
+
+        BaseComponent ret = new TextComponent();
+        if (diff < 60) {
+            // Within a minute
+            BaseComponent sec = new TextComponent(
+                    diff + " second" + (diff == 1 ? "" : "s")
+            );
+            sec.setColor(focusColor);
+            if (!past) ret.addExtra("in ");
+            ret.addExtra(sec);
+            if (past) ret.addExtra(" ago");
+        } else if (diff < 3600) {
+            // Within an hour
+            int m = diff / 60;
+
+            BaseComponent hour = new TextComponent(
+                    m + " minute" + (m == 1 ? "" : "s")
+            );
+            hour.setColor(focusColor);
+            if (!past) ret.addExtra("in ");
+            ret.addExtra(hour);
+            if (past) ret.addExtra(" ago");
+        } else if (diff < 86400) {
+            // Within a day
+            int h = diff / 3600;
+
+            BaseComponent day = new TextComponent(
+                    h + " hour" + (h == 1 ? "" : "s")
+            );
+            day.setColor(focusColor);
+            if (!past) ret.addExtra("in ");
+            ret.addExtra(day);
+            if (past) ret.addExtra(" ago");
+        } else if (diff < 604800) {
+            // Within a week
+            int d = diff / 86400;
+            int h = diff / 3600 % 24;
+
+            BaseComponent day = new TextComponent(
+                    d + " day" + (d == 1 ? "" : "s")
+            );
+            day.setColor(focusColor);
+            if (!past) ret.addExtra("in ");
+            ret.addExtra(day);
+            ret.addExtra(
+                    " and " + h + " hour" + (h == 1 ? "" : "s" )
+            );
+            if (past) ret.addExtra(" ago");
+        } else {
+            // Over a week
+            ret.addExtra("on ");
+
+            DateFormat d = DateFormat.getDateInstance(DateFormat.LONG, locale);
+            d.setTimeZone(zone);
+
+            BaseComponent date = new TextComponent(d.format(time));
+            date.setColor(focusColor);
+            ret.addExtra(date);
+
+            DateFormat t = DateFormat.getTimeInstance(DateFormat.FULL, locale);
+            t.setTimeZone(zone);
+            ret.addExtra(" at " + t.format(time));
+        }
+
+        DateFormat d = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL, locale);
+        d.setTimeZone(zone);
+
+        ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                new ComponentBuilder(d.format(time)).create())
+        );
+
+        return ret;
     }
 
     /**
