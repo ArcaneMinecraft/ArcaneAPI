@@ -13,4 +13,5 @@ public interface ArcaneColor {
     ChatColor RESET = ChatColor.RESET;
     ChatColor META = ChatColor.YELLOW;
     ChatColor LIST = ChatColor.GREEN;
+    ChatColor LIST_VARS = ChatColor.DARK_GREEN;
 }
