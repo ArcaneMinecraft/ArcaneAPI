@@ -3,7 +3,6 @@ package com.arcaneminecraft.api;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.*;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
-import org.apache.commons.lang.math.RandomUtils;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -56,11 +55,12 @@ public interface ArcaneText {
      * @return the translated form of string.
      */
     static BaseComponent translatableListRandom(Locale locale, String translatable, Object... args) {
-        String[] msgs = locale == null
-                ? ResourceBundle.getBundle("i18n.Messages").getStringArray(translatable)
-                : ResourceBundle.getBundle("i18n.Messages", locale).getStringArray(translatable);
+        String[] msgs = (locale == null
+                ? ResourceBundle.getBundle("i18n.Messages").getString(translatable)
+                : ResourceBundle.getBundle("i18n.Messages", locale).getString(translatable)
+        ).split("\n");
 
-        String msg = msgs[RandomUtils.nextInt(msgs.length)];
+        String msg = msgs[new Random().nextInt(msgs.length)];
 
         if (args.length == 0)
             return new TextComponent(msg);
@@ -375,6 +375,7 @@ public interface ArcaneText {
      */
     static BaseComponent timeText(Timestamp time, int diff, boolean past, Locale locale, TimeZone timeZone, ChatColor focusColor) {
         TimeZone zone = timeZone == null ? TimeZone.getDefault() : timeZone;
+        Locale loc = locale == null ? Locale.getDefault() : locale;
 
         BaseComponent ret = new TextComponent();
         if (diff < 60) {
@@ -427,19 +428,19 @@ public interface ArcaneText {
             // Over a week
             ret.addExtra("on ");
 
-            DateFormat d = DateFormat.getDateInstance(DateFormat.LONG, locale);
+            DateFormat d = DateFormat.getDateInstance(DateFormat.LONG, loc);
             d.setTimeZone(zone);
 
             BaseComponent date = new TextComponent(d.format(time));
             date.setColor(focusColor);
             ret.addExtra(date);
 
-            DateFormat t = DateFormat.getTimeInstance(DateFormat.FULL, locale);
+            DateFormat t = DateFormat.getTimeInstance(DateFormat.FULL, loc);
             t.setTimeZone(zone);
             ret.addExtra(" at " + t.format(time));
         }
 
-        DateFormat d = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL, locale);
+        DateFormat d = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL, loc);
         d.setTimeZone(zone);
 
         ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
