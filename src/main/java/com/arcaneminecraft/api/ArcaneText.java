@@ -3,6 +3,7 @@ package com.arcaneminecraft.api;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.*;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -229,46 +230,43 @@ public interface ArcaneText {
      * @return Clickable name text as a component with hover text
      */
     static BaseComponent playerComponent(String name, String displayName, String uuid, String detail, boolean clickable) {
+        return entityComponent(name, displayName, "minecraft:player", uuid, detail, clickable);
+    }
+
+    /**
+     * @param name Name to set
+     * @param displayName Name to display
+     * @param type Type of the "entity"
+     * @param id UUID to display
+     * @param detail Details to display on hover in gray, italic text
+     * @param clickable Makes the text activate with a click event
+     * @return Clickable name text as a component with hover text
+     */
+    static BaseComponent entityComponent(String name, String displayName, String type, String id, String detail, boolean clickable) {
         if (displayName == null)
             displayName = name;
-        if (uuid == null || uuid.equals("")) {
-            BaseComponent ret = new TextComponent(displayName);
-            if (detail != null)
-                ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                        new ComponentBuilder(detail).color(ChatColor.GRAY).italic(true).create()));
-            return ret;
-        }
 
         BaseComponent ret = new TextComponent(displayName);
-        boolean fromDiscord = detail != null && detail.equalsIgnoreCase("Server: Discord");
+        ComponentBuilder cb = new ComponentBuilder(name).reset();
 
-        if (detail == null) {
-            // TODO: The following does not work properly with current MC 1.13-pre7.
-            //ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY,
-            //        new ComponentBuilder("{name:\"" + name + "\", type:\"minecraft:player\", id:" + uuid + "}").create()
-            //));
-            // BEGIN Temporary fix
-            ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                    new ComponentBuilder(name + "\n") // Color is reset here because this keeps getting italicized
-                            .append("Type: minecraft:player", ComponentBuilder.FormatRetention.NONE).append("\n")
-                            .append(uuid, ComponentBuilder.FormatRetention.NONE).create()
-            ));
-            // END Temporary fix
-        } else {
-            ComponentBuilder cb = new ComponentBuilder(name + " ").color(ChatColor.RESET) // Color is reset here because this keeps getting italicized
-                    .append(detail, ComponentBuilder.FormatRetention.NONE).italic(true).color(ChatColor.GRAY).append("\n");
+        // First component - name and details
 
-            if (!fromDiscord)
-                cb.append("Type: minecraft:player", ComponentBuilder.FormatRetention.NONE).append("\n");
-
-            cb.append(uuid, ComponentBuilder.FormatRetention.NONE);
-
-            ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, cb.create()));
-
+        if (detail != null && !detail.isEmpty()) {
+            cb.append(" " + detail).color(ChatColor.GRAY).italic(true);
         }
-        if (clickable && !fromDiscord)
+
+        if (type != null && !type.isEmpty()) {
+            cb.append("\ntype: " + type).reset();
+        }
+
+        if (id != null && !id.isEmpty()) {
+            cb.append("\n" + id).reset();
+        }
+
+        if (clickable)
             ret.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/msg " + name + " "));
 
+        ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, cb.create()));
         return ret;
     }
 
@@ -295,10 +293,42 @@ public interface ArcaneText {
         }
 
         Entity e = (Entity)sender;
-        BaseComponent ret = new TextComponent(e.getCustomName());
-        ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY,
-                new ComponentBuilder("{name:\"" + e.getName() + "\", type:\"" + e.getType() + "\", id:\"" + e.getUniqueId() + "\"}").create()));
-        return ret;
+        //noinspection deprecation
+        return entityComponent(e.getName(), e.getCustomName(), "minecraft:" + e.getType().getName(), e.getUniqueId().toString(), null, false);
+    }
+
+    /**
+     * @param sender Sender to make clickable component from
+     * @return Clickable name text as a component with hover text
+     */
+    static BaseComponent playerComponentSpigot(Player sender) {
+        return playerComponentSpigot(sender, null);
+    }
+
+    /**
+     * @param sender Sender to make clickable component from
+     * @param detail Details to display on hover in gray, italic text
+     * @return Clickable name text as a component with hover text
+     */
+    static BaseComponent playerComponentSpigot(Player sender, String detail) {
+        return playerComponent(sender.getName(), sender.getDisplayName(), sender.getUniqueId().toString(), detail, true);
+    }
+
+    /**
+     * @param offlinePlayer Sender to make clickable component from
+     * @return Clickable name text as a component with hover text
+     */
+    static BaseComponent playerComponentSpigot(OfflinePlayer offlinePlayer) {
+        return playerComponentSpigot(offlinePlayer, null);
+    }
+
+    /**
+     * @param offlinePlayer Sender to make clickable component from
+     * @param detail Details to display on hover in gray, italic text
+     * @return Clickable name text as a component with hover text
+     */
+    static BaseComponent playerComponentSpigot(OfflinePlayer offlinePlayer, String detail) {
+        return playerComponent(offlinePlayer.getName(), offlinePlayer.getName(), offlinePlayer.getUniqueId().toString(), detail, false);
     }
 
     /**
