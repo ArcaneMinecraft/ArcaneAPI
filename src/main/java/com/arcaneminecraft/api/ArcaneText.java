@@ -3,12 +3,14 @@ package com.arcaneminecraft.api;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.*;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
-import java.util.Arrays;
-import java.util.Iterator;
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.util.*;
 
 /**
  * ArcaneCommons Class.
@@ -21,6 +23,51 @@ import java.util.Iterator;
 public interface ArcaneText {
     String THIS_NETWORK_NAME_SHORT = "Arcane";
     String THIS_NETWORK_NAME = "Arcane Survival";
+
+    /**
+     * Gets string in translated form.
+     * @param locale Language locale for the message; null for default.
+     * @param translatable Translatable String
+     * @param args arguments in case of  placeholders(%s) to replace
+     * @return the translated form of string.
+     */
+    static BaseComponent translatable(Locale locale, String translatable, Object... args) {
+        String msg = locale == null
+                ? ResourceBundle.getBundle("i18n.Messages").getString(translatable)
+                : ResourceBundle.getBundle("i18n.Messages", locale).getString(translatable);
+
+        if (args.length == 0)
+            return new TextComponent(msg);
+        else
+            return new TranslatableComponent(msg, args);
+    }
+
+    static String translatableString(Locale locale, String translatable) {
+        return locale == null
+                ? ResourceBundle.getBundle("i18n.Messages").getString(translatable)
+                : ResourceBundle.getBundle("i18n.Messages", locale).getString(translatable);
+    }
+
+    /**
+     * Gets string chosen at random from list in translated form.
+     * @param locale Language locale for the message; null for default.
+     * @param translatable Translatable String Array (comma-spliced)
+     * @param args arguments in case of  placeholders(%s) to replace
+     * @return the translated form of string.
+     */
+    static BaseComponent translatableListRandom(Locale locale, String translatable, Object... args) {
+        String[] msgs = (locale == null
+                ? ResourceBundle.getBundle("i18n.Messages").getString(translatable)
+                : ResourceBundle.getBundle("i18n.Messages", locale).getString(translatable)
+        ).split("\n");
+
+        String msg = msgs[new Random().nextInt(msgs.length)];
+
+        if (args.length == 0)
+            return new TextComponent(msg);
+        else
+            return new TranslatableComponent(msg, args);
+    }
 
     /**
      * @return the full name of this network, "Arcane Survival".
@@ -67,12 +114,18 @@ public interface ArcaneText {
         for (int i = fromIndex; i < ArrayWithLink.length; i++) {
             if (i != fromIndex) sb.append(' ');
 
-            //noinspection RegExpRedundantEscape (the extra escapes are required!!!)
-            if (ArrayWithLink[i].matches(".+\\..+|http(s?):\\/\\/.+")) {
+            if (ArrayWithLink[i].matches("\\S+\\.\\S+|http(s?)://\\S+")) {
+                cb.append(TextComponent.fromLegacyText(sb.toString()), ComponentBuilder.FormatRetention.FORMATTING);
+                cb.append(urlSingle(ArrayWithLink[i]));
+                sb = new StringBuilder();
+            } else if (ArrayWithLink[i].matches("/?r/\\S+")) {
+                // Reddit
                 cb.append(TextComponent.fromLegacyText(sb.toString()), ComponentBuilder.FormatRetention.FORMATTING);
 
-                cb.append(urlSingle(ArrayWithLink[i]));
+                String sr = ChatColor.stripColor(ArrayWithLink[i]);
+                String url = "https://reddit.com" + (sr.startsWith("/") ? "" : "/") + sr;
 
+                cb.append(urlSingleSpecial(ArrayWithLink[i], url));
                 sb = new StringBuilder();
             } else {
                 sb.append(ArrayWithLink[i]);
@@ -99,6 +152,8 @@ public interface ArcaneText {
     static BaseComponent urlSingle(String url) {
         String u = ChatColor.stripColor(url);
         String d;
+
+        // Shorten URL text if too long
         if (u.length() > 35) {
             int first = 29 + url.length() - u.length();
             if (url.charAt(first - 1) == '\u00A7')
@@ -113,8 +168,19 @@ public interface ArcaneText {
             d = url;
         }
 
+        return urlSingleSpecial(d, u);
+    }
+
+    /**
+     * Activates string as a clickable URL.
+     * @param text The text
+     * @param url String that is definitely a URL
+     * @return Text with activated (clickable) URL
+     */
+    static BaseComponent urlSingleSpecial(String text, String url) {
         BaseComponent ret;
-        BaseComponent[] lt = TextComponent.fromLegacyText(d);
+        BaseComponent[] lt = TextComponent.fromLegacyText(text);
+
         if (lt.length == 1) {
             ret = lt[0];
         } else {
@@ -128,9 +194,9 @@ public interface ArcaneText {
         }
 
         ret.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL,
-                u.startsWith("http://") || u.startsWith("https://")
-                        ? u
-                        : "http://" + u
+                url.startsWith("http://") || url.startsWith("https://")
+                        ? url
+                        : "http://" + url
         ));
         return ret;
     }
@@ -164,46 +230,43 @@ public interface ArcaneText {
      * @return Clickable name text as a component with hover text
      */
     static BaseComponent playerComponent(String name, String displayName, String uuid, String detail, boolean clickable) {
+        return entityComponent(name, displayName, "minecraft:player", uuid, detail, clickable);
+    }
+
+    /**
+     * @param name Name to set
+     * @param displayName Name to display
+     * @param type Type of the "entity"
+     * @param id UUID to display
+     * @param detail Details to display on hover in gray, italic text
+     * @param clickable Makes the text activate with a click event
+     * @return Clickable name text as a component with hover text
+     */
+    static BaseComponent entityComponent(String name, String displayName, String type, String id, String detail, boolean clickable) {
         if (displayName == null)
             displayName = name;
-        if (uuid == null || uuid.equals("")) {
-            BaseComponent ret = new TextComponent(displayName);
-            if (detail != null)
-                ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                        new ComponentBuilder(detail).color(ChatColor.GRAY).italic(true).create()));
-            return ret;
-        }
 
         BaseComponent ret = new TextComponent(displayName);
-        boolean fromDiscord = detail != null && detail.equalsIgnoreCase("Server: Discord");
+        ComponentBuilder cb = new ComponentBuilder(name).reset();
 
-        if (detail == null) {
-            // TODO: The following does not work properly with current MC 1.13-pre7.
-            //ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY,
-            //        new ComponentBuilder("{name:\"" + name + "\", type:\"minecraft:player\", id:" + uuid + "}").create()
-            //));
-            // BEGIN Temporary fix
-            ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                    new ComponentBuilder(name + "\n") // Color is reset here because this keeps getting italicized
-                            .append("Type: minecraft:player", ComponentBuilder.FormatRetention.NONE).append("\n")
-                            .append(uuid, ComponentBuilder.FormatRetention.NONE).create()
-            ));
-            // END Temporary fix
-        } else {
-            ComponentBuilder cb = new ComponentBuilder(name + " ").color(ChatColor.RESET) // Color is reset here because this keeps getting italicized
-                    .append(detail, ComponentBuilder.FormatRetention.NONE).italic(true).color(ChatColor.GRAY).append("\n");
+        // First component - name and details
 
-            if (!fromDiscord)
-                cb.append("Type: minecraft:player", ComponentBuilder.FormatRetention.NONE).append("\n");
-
-            cb.append(uuid, ComponentBuilder.FormatRetention.NONE);
-
-            ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, cb.create()));
-
+        if (detail != null && !detail.isEmpty()) {
+            cb.append(" " + detail).color(ChatColor.GRAY).italic(true);
         }
-        if (clickable && !fromDiscord)
+
+        if (type != null && !type.isEmpty()) {
+            cb.append("\ntype: " + type).reset();
+        }
+
+        if (id != null && !id.isEmpty()) {
+            cb.append("\n" + id).reset();
+        }
+
+        if (clickable)
             ret.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/msg " + name + " "));
 
+        ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, cb.create()));
         return ret;
     }
 
@@ -230,10 +293,42 @@ public interface ArcaneText {
         }
 
         Entity e = (Entity)sender;
-        BaseComponent ret = new TextComponent(e.getCustomName());
-        ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY,
-                new ComponentBuilder("{name:\"" + e.getName() + "\", type:\"" + e.getType() + "\", id:\"" + e.getUniqueId() + "\"}").create()));
-        return ret;
+        //noinspection deprecation
+        return entityComponent(e.getName(), e.getCustomName(), "minecraft:" + e.getType().getName(), e.getUniqueId().toString(), null, false);
+    }
+
+    /**
+     * @param sender Sender to make clickable component from
+     * @return Clickable name text as a component with hover text
+     */
+    static BaseComponent playerComponentSpigot(Player sender) {
+        return playerComponentSpigot(sender, null);
+    }
+
+    /**
+     * @param sender Sender to make clickable component from
+     * @param detail Details to display on hover in gray, italic text
+     * @return Clickable name text as a component with hover text
+     */
+    static BaseComponent playerComponentSpigot(Player sender, String detail) {
+        return playerComponent(sender.getName(), sender.getDisplayName(), sender.getUniqueId().toString(), detail, true);
+    }
+
+    /**
+     * @param offlinePlayer Sender to make clickable component from
+     * @return Clickable name text as a component with hover text
+     */
+    static BaseComponent playerComponentSpigot(OfflinePlayer offlinePlayer) {
+        return playerComponentSpigot(offlinePlayer, null);
+    }
+
+    /**
+     * @param offlinePlayer Sender to make clickable component from
+     * @param detail Details to display on hover in gray, italic text
+     * @return Clickable name text as a component with hover text
+     */
+    static BaseComponent playerComponentSpigot(OfflinePlayer offlinePlayer, String detail) {
+        return playerComponent(offlinePlayer.getName(), offlinePlayer.getName(), offlinePlayer.getUniqueId().toString(), detail, false);
     }
 
     /**
@@ -255,6 +350,134 @@ public interface ArcaneText {
             return playerComponent(p.getName(), p.getDisplayName(), p.getUniqueId().toString(), detail, true);
         }
         return new TextComponent("Server");
+    }
+
+    /**
+     * This calculates second difference and whether the difference is in the past on its own.
+     * @param time Timestamp to translate into a string
+     * @param locale Locale of the time
+     * @param timeZone TimeZone of the player
+     * @param focusColor The ChatColor of the focus parts
+     * @return Parsed time information (relative time if less than 7 days ago)
+     */
+    static BaseComponent timeText(Timestamp time, Locale locale, TimeZone timeZone, ChatColor focusColor) {
+        // difference in seconds
+        int diff = (int) ((System.currentTimeMillis() - time.getTime()) / 1000);
+        boolean past;
+        if (diff < 0) {
+            past = false;
+            diff = Math.abs(diff);
+        } else {
+            past = true;
+        }
+        return timeText(time, diff, past, locale, timeZone, focusColor);
+    }
+
+    /**
+     * This calculates the timestamp on its own.
+     * @param diff Time difference in seconds
+     * @param past If the time was in past
+     * @param locale Locale of the time
+     * @param timeZone TimeZone of the player
+     * @param focusColor The ChatColor of the focus parts
+     * @return Parsed time information (relative time if less than 7 days ago)
+     */
+    static BaseComponent timeText(int diff, boolean past, Locale locale, TimeZone timeZone, ChatColor focusColor) {
+        long ms = diff * 1000;
+
+        if (past)
+            ms = System.currentTimeMillis() - ms;
+        else
+            ms = System.currentTimeMillis() + ms;
+
+        Timestamp time = new Timestamp(ms);
+        return timeText(time, diff, past, locale, timeZone, focusColor);
+    }
+
+    /**
+     * @param time Timestamp to translate into a string
+     * @param diff Time difference in seconds
+     * @param past If the time was in past
+     * @param locale Locale of the time
+     * @param timeZone TimeZone of the player
+     * @param focusColor The ChatColor of the focus parts
+     * @return Parsed time information (relative time if less than 7 days ago)
+     */
+    static BaseComponent timeText(Timestamp time, int diff, boolean past, Locale locale, TimeZone timeZone, ChatColor focusColor) {
+        TimeZone zone = timeZone == null ? TimeZone.getDefault() : timeZone;
+        Locale loc = locale == null ? Locale.getDefault() : locale;
+
+        BaseComponent ret = new TextComponent();
+        if (diff < 60) {
+            // Within a minute
+            BaseComponent sec = new TextComponent(
+                    diff + " second" + (diff == 1 ? "" : "s")
+            );
+            sec.setColor(focusColor);
+            if (!past) ret.addExtra("in ");
+            ret.addExtra(sec);
+            if (past) ret.addExtra(" ago");
+        } else if (diff < 3600) {
+            // Within an hour
+            int m = diff / 60;
+
+            BaseComponent hour = new TextComponent(
+                    m + " minute" + (m == 1 ? "" : "s")
+            );
+            hour.setColor(focusColor);
+            if (!past) ret.addExtra("in ");
+            ret.addExtra(hour);
+            if (past) ret.addExtra(" ago");
+        } else if (diff < 86400) {
+            // Within a day
+            int h = diff / 3600;
+
+            BaseComponent day = new TextComponent(
+                    h + " hour" + (h == 1 ? "" : "s")
+            );
+            day.setColor(focusColor);
+            if (!past) ret.addExtra("in ");
+            ret.addExtra(day);
+            if (past) ret.addExtra(" ago");
+        } else if (diff < 604800) {
+            // Within a week
+            int d = diff / 86400;
+            int h = diff / 3600 % 24;
+
+            BaseComponent day = new TextComponent(
+                    d + " day" + (d == 1 ? "" : "s")
+            );
+            day.setColor(focusColor);
+            if (!past) ret.addExtra("in ");
+            ret.addExtra(day);
+            ret.addExtra(
+                    " and " + h + " hour" + (h == 1 ? "" : "s" )
+            );
+            if (past) ret.addExtra(" ago");
+        } else {
+            // Over a week
+            ret.addExtra("on ");
+
+            DateFormat d = DateFormat.getDateInstance(DateFormat.LONG, loc);
+            d.setTimeZone(zone);
+
+            BaseComponent date = new TextComponent(d.format(time));
+            date.setColor(focusColor);
+            ret.addExtra(date);
+
+            DateFormat t = DateFormat.getTimeInstance(DateFormat.FULL, loc);
+            t.setTimeZone(zone);
+            ret.addExtra(" at " + t.format(time));
+        }
+
+        DateFormat d = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL, loc);
+        d.setTimeZone(zone);
+
+        ret.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                new ComponentBuilder(d.format(time)).create())
+        );
+
+        return ret;
     }
 
     /**
