@@ -21,6 +21,7 @@ public enum BungeeCommandUsage {
     LIST            ("list"),
     ME              ("me", "<action ...>", "arcane.command.me"),
     MSG             ("msg", "<player> <private message ...>", "arcane.command.msg", null, "tell", "m", "w"),
+    PROFILE         ("profile", "[player]", "arcane.command.profile", null, "player"),
     REPLY           ("reply", "<private message ...>", "arcane.command.msg", null, "r"),
     NEWS            ("news"),
     OPTION          ("option", "[option name] [value]"),

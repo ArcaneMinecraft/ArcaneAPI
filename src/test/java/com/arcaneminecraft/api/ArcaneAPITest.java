@@ -95,5 +95,7 @@ public class ArcaneAPITest {
         assertSame(ChatColor.class, ArcaneColor.DONOR.getClass());
         assertSame(ChatColor.class, ArcaneColor.RESET.getClass());
         assertSame(ChatColor.class, ArcaneColor.META.getClass());
+        assertSame(ChatColor.class, ArcaneColor.LIST.getClass());
+        assertSame(ChatColor.class, ArcaneColor.LIST_VARS.getClass());
     }
 }
