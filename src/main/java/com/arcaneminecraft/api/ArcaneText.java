@@ -256,7 +256,7 @@ public interface ArcaneText {
         }
 
         if (type != null && !type.isEmpty()) {
-            cb.append("\ntype: " + type).reset();
+            cb.append("\nType: " + type).reset();
         }
 
         if (id != null && !id.isEmpty()) {
