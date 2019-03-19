@@ -2,6 +2,7 @@ package com.arcaneminecraft.api;
 
 @SuppressWarnings("unused")
 public enum BungeeCommandUsage {
+    ARCANESURVIVAL  ("arcanesurvival", null, null, "Informational Command", "arcane", "arc", "arcsurvival"),
     CREATIVE        ("creative", null, "bungeecord.server.creative", "Move to the creative server"),
     SURVIVAL        ("survival", null, null, "Move to the survival server"),
     EVENT           ("event", "[event name]", "arcane.command.event", "Move to the event server"),
