@@ -114,7 +114,7 @@ public interface ArcaneText {
         for (int i = fromIndex; i < ArrayWithLink.length; i++) {
             if (i != fromIndex) sb.append(' ');
 
-            if (ArrayWithLink[i].matches("\\S+\\.\\S+|http(s?)://\\S+")) {
+            if (ArrayWithLink[i].matches("[^\\s.]+(\\.[^\\s.]+)+|https?://\\S+")) {
                 cb.append(TextComponent.fromLegacyText(sb.toString()), ComponentBuilder.FormatRetention.FORMATTING);
                 cb.append(urlSingle(ArrayWithLink[i]));
                 sb = new StringBuilder();
