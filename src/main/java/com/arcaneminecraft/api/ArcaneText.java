@@ -21,7 +21,9 @@ import java.util.*;
  */
 @SuppressWarnings({"unused"})
 public interface ArcaneText {
+    @Deprecated
     String THIS_NETWORK_NAME_SHORT = "Arcane";
+    @Deprecated
     String THIS_NETWORK_NAME = "Arcane Survival";
 
     /**
@@ -71,16 +73,20 @@ public interface ArcaneText {
 
     /**
      * @return the full name of this network, "Arcane Survival".
+     * @deprecated Use translatable() instead
      */
+    @Deprecated
     static String getThisNetworkName() {
-        return THIS_NETWORK_NAME;
+        return translatableString(null, "server.name");
     }
 
     /**
      * @return the short name of this network, "Arcane".
+     * @deprecated Use translatable() instead
      */
+    @Deprecated
     static String getThisNetworkNameShort() {
-        return THIS_NETWORK_NAME_SHORT;
+        return translatableString(null, "server.name.short");
     }
 
     /**
