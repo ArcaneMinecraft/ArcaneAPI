@@ -21,7 +21,9 @@ import java.util.*;
  */
 @SuppressWarnings({"unused"})
 public interface ArcaneText {
+    @Deprecated
     String THIS_NETWORK_NAME_SHORT = "Arcane";
+    @Deprecated
     String THIS_NETWORK_NAME = "Arcane Survival";
 
     /**
@@ -71,16 +73,20 @@ public interface ArcaneText {
 
     /**
      * @return the full name of this network, "Arcane Survival".
+     * @deprecated Use translatable() instead
      */
+    @Deprecated
     static String getThisNetworkName() {
-        return THIS_NETWORK_NAME;
+        return translatableString(null, "server.name");
     }
 
     /**
      * @return the short name of this network, "Arcane".
+     * @deprecated Use translatable() instead
      */
+    @Deprecated
     static String getThisNetworkNameShort() {
-        return THIS_NETWORK_NAME_SHORT;
+        return translatableString(null, "server.name.short");
     }
 
     /**
@@ -114,7 +120,7 @@ public interface ArcaneText {
         for (int i = fromIndex; i < ArrayWithLink.length; i++) {
             if (i != fromIndex) sb.append(' ');
 
-            if (ArrayWithLink[i].matches("\\S+\\.\\S+|http(s?)://\\S+")) {
+            if (ArrayWithLink[i].matches("[^\\s.]+(\\.[^\\s.]+)+|https?://\\S+")) {
                 cb.append(TextComponent.fromLegacyText(sb.toString()), ComponentBuilder.FormatRetention.FORMATTING);
                 cb.append(urlSingle(ArrayWithLink[i]));
                 sb = new StringBuilder();
@@ -256,7 +262,7 @@ public interface ArcaneText {
         }
 
         if (type != null && !type.isEmpty()) {
-            cb.append("\ntype: " + type).reset();
+            cb.append("\nType: " + type).reset();
         }
 
         if (id != null && !id.isEmpty()) {

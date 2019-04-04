@@ -2,6 +2,7 @@ package com.arcaneminecraft.api;
 
 @SuppressWarnings("unused")
 public enum BungeeCommandUsage {
+    ARCANESURVIVAL  ("arcanesurvival", null, null, "Informational Command", "arcane", "arc", "arcsurvival"),
     CREATIVE        ("creative", null, "bungeecord.server.creative", "Move to the creative server"),
     SURVIVAL        ("survival", null, null, "Move to the survival server"),
     EVENT           ("event", "[event name]", "arcane.command.event", "Move to the event server"),
@@ -17,10 +18,12 @@ public enum BungeeCommandUsage {
     DONATE          ("donate", null, "arcane.command.links"),
     RULES           ("rules", null, "arcane.command.links"),
     FORUM           ("forum", null, "arcane.command.links"),
-    DISCORD         ("discord", "[link|unlink]", "arcane.command.discord"),
+    DISCORD         ("discord", "[link [<username> <token>]|unlink]", "arcane.command.links"),
+    REDDIT          ("reddit", "[link <username>|unlink]", "arcane.command.links"),
     LIST            ("list"),
     ME              ("me", "<action ...>", "arcane.command.me"),
     MSG             ("msg", "<player> <private message ...>", "arcane.command.msg", null, "tell", "m", "w"),
+    PROFILE         ("profile", "[player]", "arcane.command.profile", null, "player"),
     REPLY           ("reply", "<private message ...>", "arcane.command.msg", null, "r"),
     NEWS            ("news"),
     OPTION          ("option", "[option name] [value]"),
