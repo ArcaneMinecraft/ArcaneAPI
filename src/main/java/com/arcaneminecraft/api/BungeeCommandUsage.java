@@ -25,6 +25,7 @@ public enum BungeeCommandUsage {
     MSG             ("msg", "<player> <private message ...>", "arcane.command.msg", null, "tell", "m", "w"),
     PROFILE         ("profile", "[player]", "arcane.command.profile", null, "player"),
     REPLY           ("reply", "<private message ...>", "arcane.command.msg", null, "r"),
+    ROLL            ("roll", "[[# rolls]d<highest #>]"),
     NEWS            ("news"),
     OPTION          ("option", "[option name] [value]"),
     PING            ("ping", "[player]"),
